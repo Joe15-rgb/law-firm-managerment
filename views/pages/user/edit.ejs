@@ -1,0 +1,18 @@
+<header>
+  <h2>Modifier l'Utilisateur: <%= user.firstName%></h2>
+</header>
+
+<form action="/users/edit/<%= user.id %>?_method=PUT" method="post">
+
+  <% UserFields.forEach(field => { %>
+   <%- include('../../components/input.ejs', {
+    ...field,
+    value: field.name === 'sex' ? sex
+    : field.name === 'role' ? roles : user[field.name]
+    }) %>
+  <% }) %>
+
+
+  <button type="submit">Sauvegarder</button>
+
+</form>

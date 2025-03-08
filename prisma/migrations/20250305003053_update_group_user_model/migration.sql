@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `groupuser` MODIFY `role` ENUM('LEADER', 'MEMBER') NULL DEFAULT 'MEMBER';

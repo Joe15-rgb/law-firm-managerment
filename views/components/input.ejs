@@ -1,0 +1,43 @@
+<%#
+  |*******************************************|
+  | Variables for Input Component              |
+  |*******************************************|
+
+  * type: string
+  * label: string
+  * value: any (string or array for select options)
+  * name: string (name and id of the input)
+ %>
+
+<% if (["email", "password", "number", "text", "date", "tel"].includes(type)) { %>
+  <div class="field">
+    <label for="<%= name %>"> <%= label %> </label><br>
+    <input
+      type="<%= type %>"
+      name="<%= name %>"
+      id="<%= name %>"
+      value="<%= typeof value !== 'undefined' ? value : '' %>"
+      placeholder="<%= name %> "
+    />
+  </div>
+<% } else if (type === "select" && Array.isArray(value)) { %>
+  <div class="field">
+    <label for="<%= name %>"> <%= label %> </label><br>
+    <select name="<%= name %>" id="<%= name %>">
+      <% value.forEach(option => { %>
+        <option <%= option === selectedOption ? 'selected' : '' %> value="<%= option %>">
+          <%= option %>
+        </option>
+      <% }) %>
+    </select>
+  </div>
+<% } else if (type === 'textarea') { %>
+ <div class="field">
+    <label for="<%= name %>"> <%= label %> </label><br>
+    <textarea name="<%= name %>" id="<%= name %>">
+      <%= typeof value !== 'undefined' ? value : '' %>
+    </textarea>
+ </div>
+<% } else { %>
+  <p>Error: Unsupported type or invalid value.</p>
+<% } %>

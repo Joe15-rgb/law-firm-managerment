@@ -1,0 +1,15 @@
+<header>
+  <h2>Ajouter un Utilisateur</h2>
+</header>
+
+
+<form action="/users/register" method="post">
+
+  <% UserFields.forEach(field => { %>
+   <%- include('../../components/input.ejs', field) %>
+  <% }) %>
+
+
+  <button type="submit">Sauvegarder</button>
+
+</form>

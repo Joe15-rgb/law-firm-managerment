@@ -1,0 +1,3 @@
+ADMIN	/admins	GET
+USER	/users	GET
+MODERATOR	/moderators	GET

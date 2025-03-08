@@ -1,0 +1,82 @@
+import { PrismaClient, type Group } from '@prisma/client';
+import { getCache, setCache } from '@tools/cache';
+import { NotFoundError } from '@tools/errors';
+import { deepCompare } from '@tools/helpers';
+
+const prisma = new PrismaClient();
+
+class GroupPrismaService {
+   private CACHE_TTL = 600;
+
+    async create(data: Group) {}
+    async getOneGroup(id: string) {
+      const cacheKey = `group:${id}`;
+      const cachedUser = await getCache(cacheKey);
+
+      const group = await prisma.group.findUnique({
+         where: { id },
+         include: {
+            GroupUser: {
+               include: { user: true },
+            },
+         },
+      });
+
+      if (!group) throw new NotFoundError('User not found');
+
+      if (cachedUser && deepCompare(cachedUser, group)) return cachedUser;
+
+      if (group) await setCache(cacheKey, group, this.CACHE_TTL);
+
+      return group;
+   }
+    async getAllGroup(page: number = 1, limit: number = 10) {
+      const cacheKey = `groups:all${page}:${limit}`;
+      const cachedData = await getCache(cacheKey);
+
+      const [groups, total] = await Promise.all([
+         prisma.group.findMany({
+            include: {
+               GroupUser: {
+                  include: { user: true },
+               },
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+         }),
+         prisma.group.count(),
+      ]);
+
+      const data = groups.map((group) => ({
+         id: group.id,
+         name: group.name,
+         createdAt: group.createdAt,
+         members: group.GroupUser.map((groupUser) => ({
+            ...groupUser.user,
+            role: groupUser.role,
+         })),
+         membersCount: group.GroupUser.length,
+      }));
+
+      const result = {
+         data,
+         meta: {
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            limit,
+         },
+      };
+      if (cachedData && JSON.stringify(cachedData) === JSON.stringify(result)) {
+         return cachedData;
+      }
+
+      await setCache(cacheKey, result, this.CACHE_TTL);
+      return result;
+   }
+   private async updateGroup(data: Group, id: string) {}
+   private async deleteGroup(data: Group) {}
+}
+
+export default GroupPrismaService
