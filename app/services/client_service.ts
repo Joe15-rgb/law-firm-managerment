@@ -1,10 +1,10 @@
-import { PrismaClient, type Client, type Case } from '@prisma/client';
+import { PrismaClient, type Client, type LegalCase } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { getCache, invalidateCacheByPrefix, setCache } from '@tools/cache';
 import { ErrorWithStatus, NotFoundError } from '@tools/errors';
 import { requestLogger } from '@tools/logger';
 
-type ClientWithCases = Client & { cases: Case[] };
+type ClientWithCases = Client & { legalCases: LegalCase[] };
 
 type ResultData = {
    data: ClientWithCases[];
@@ -84,7 +84,7 @@ export class ClientPrismaService {
 
       const client = await this.prisma.client.findUnique({
          where: { id },
-         include: { cases: true },
+         include: { legalCases: true },
       });
 
       if (!client) {
@@ -102,13 +102,12 @@ export class ClientPrismaService {
       const cacheKey = `${this.LIST_CACHE_PREFIX}${validatedPage}:${validatedLimit}`;
 
       const cachedData = await getCache(cacheKey);
-      if (cachedData) return cachedData;
 
       const [clients, total] = await Promise.all([
          this.prisma.client.findMany({
             skip: (validatedPage - 1) * validatedLimit,
             take: validatedLimit,
-            include: { cases: true },
+            include: { legalCases: true },
             orderBy: { createdAt: 'desc' },
          }),
          this.prisma.client.count(),
@@ -123,6 +122,8 @@ export class ClientPrismaService {
             limit: validatedLimit,
          },
       };
+
+      if (JSON.stringify(cachedData) === JSON.stringify(result)) return cachedData;
 
       await setCache(cacheKey, result, this.CACHE_TTL);
       return result;

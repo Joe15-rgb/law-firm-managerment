@@ -1,0 +1,18 @@
+<div x-data="{open: false}" class="badge">
+  <div @click="open = ! open" class="profile">
+    <img
+      src="<%= `/avatars/${user.avatarUrl}` || '/assets/profile.svg' %> "
+      alt="thumbnail"
+      class="thumbnail" />
+    <div class="info">
+      <b><%= user.firstName %></b><br />
+      <span><%= user.role %> </span>
+    </div>
+    <svg viewBox="0 0 24 24">
+      <use href="/assets/icons.svg#chevron_down" />
+    </svg>
+  </div>
+  <template x-if="open">
+    <%- include('../components/setting', {user.firstName, user.role}) %>
+  </template>
+</div>

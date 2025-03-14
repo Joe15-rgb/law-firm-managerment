@@ -1,12 +1,14 @@
-<h1>Connexion</h1>
+<%- include('../partials/header') %>
+  <%- include('../partials/flash') %>
+  <h1>Connexion</h1>
 
 <form action="/" method="post">
   <div class="field">
     <label for="email">Entrez votre adresse email</label>
-    <input 
-    type="email" 
-    name="email" 
-    id="email" 
+    <input
+    type="email"
+    name="email"
+    id="email"
     placeholder="Email"
     required
     />
@@ -19,7 +21,7 @@
       id="password"
       maxlength="20"
       minlength="4"
-      placeholder="Password" 
+      placeholder="Password"
       required
     />
   </div>
@@ -27,3 +29,6 @@
 
   <a href="/forgot">Mot de passe oublié?</a>
 </form>
+
+<%- include('../partials/footer') %>
+

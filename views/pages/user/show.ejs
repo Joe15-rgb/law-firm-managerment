@@ -4,11 +4,10 @@
 </header>
 
 <h1>Utilisateur</h1>
-<img src="/users/<%= user.thumbnail %>" alt="<%= user.thumbnail %>">
+<img src="/avatars/<%= user.avatarUrl %>" alt="<%= user.avatarUrl %>">
 <h3><%= user.firstName %> <%= user.lastName %></h3>
 <p><%= user.role %></p>
 <a href="/"><%= user.email %></a><br>
 <span><%= user.phone %></span><br>
 <span><%= user.sex %></span>
-<address><%= user.address %></address>
 <time datetime="<%= user.joinedAt %>"><%= user.joinedAt %></time>

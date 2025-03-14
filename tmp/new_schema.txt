@@ -1,0 +1,242 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"] // Activation des actions référentielles
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id           String       @id @default(uuid())
+  firstName    String       @db.VarChar(40)
+  lastName     String       @db.VarChar(40)
+  email        String       @unique @db.VarChar(50)
+  phone        String       @db.VarChar(20) // Changement de Char à VarChar pour plus de flexibilité
+  birthDate    DateTime     // Remplace age pour une donnée plus précise
+  sex          Sex
+  clientType   ClientType
+  legalCases   LegalCase[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  addressLine1 String?      @db.VarChar(255)
+  addressLine2 String?      @db.VarChar(255)
+  city         String?      @db.VarChar(100)
+  country      String?      @db.VarChar(100)
+
+  @@index([lastName, firstName])
+  @@index([createdAt])
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ClientType {
+  INDIVIDUAL
+  COMPANY
+}
+
+model LegalCase {
+  id           String          @id @default(uuid())
+  reference    String          @unique
+  caseNumber   Int             @unique @default(autoincrement()) // Renommage plus explicite
+  title        String          @db.VarChar(200)
+  client       Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     String
+  description  String?         @db.Text
+  priority     Int             @default(1) // Renommage de 'point' pour plus de clarté
+  urgency      UrgencyCase     @default(LOW)
+  status       CaseStatus      @default(PENDING)
+  caseType     CaseTypes
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  documents    Document[]
+  appointments Appointment[]
+  fees         Fee[]
+  treatments   Treatment[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([caseType])
+}
+
+enum CaseTypes {
+  CIVIL       // Renommage pour plus de clarté
+  CRIMINAL
+  COMMERCIAL
+  LABOR
+  ADMINISTRATIVE
+}
+
+enum UrgencyCase {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum CaseStatus {
+  PENDING
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+model Treatment {
+  id          String      @id @default(uuid())
+  status      TreatmentStatus @default(PENDING)
+  legalCase   LegalCase   @relation(fields: [legalCaseId], references: [id], onDelete: Cascade)
+  legalCaseId String
+  assignedTo  String      // Contient l'ID de User ou Group selon actorType
+  actorType   ActorType
+
+  @@unique([legalCaseId, assignedTo, actorType])
+  @@index([actorType, assignedTo])
+}
+
+enum ActorType {
+  USER
+  GROUP
+}
+
+enum TreatmentStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id           String         @id @default(uuid())
+  firstName    String         @db.VarChar(40)
+  lastName     String         @db.VarChar(40)
+  email        String         @unique @db.VarChar(50)
+  passwordHash String         // Renommage pour clarté
+  phone        String         @db.VarChar(20)
+  avatarUrl    String?        // Renommage de thumbnail
+  role         UserRole
+  sex          Sex
+  joinedAt     DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  groupMembers GroupMember[]
+  treatments   Treatment[]
+
+  @@index([lastName, firstName])
+}
+
+enum UserRole {
+  LAWYER
+  PARALEGAL
+  ADMIN
+}
+
+model Document {
+  id           String       @id @default(uuid())
+  legalCase    LegalCase    @relation(fields: [legalCaseId], references: [id], onDelete: Cascade)
+  legalCaseId  String
+  fileName     String       @db.VarChar(255)
+  fileUrl      String       // Renommage de filePath pour clarification
+  mimeType     String       @db.VarChar(50)
+  documentType DocumentType
+  uploadedAt   DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([documentType])
+}
+
+enum DocumentType {
+  CONTRACT
+  EVIDENCE
+  CORRESPONDENCE
+  COURT_FILING
+  OTHER
+}
+
+model Appointment {
+  id           String              @id @default(uuid())
+  legalCase    LegalCase           @relation(fields: [legalCaseId], references: [id], onDelete: Cascade)
+  legalCaseId  String
+  organizer    User                @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  organizerId  String
+  scheduledAt  DateTime            // Renommage de dateTime
+  duration     Int                 @default(60) // Durée en minutes
+  subject      String              @db.VarChar(200)
+  description  String?             @db.Text
+  status       AppointmentStatus   @default(SCHEDULED)
+
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED  // Correction orthographique
+  RESCHEDULED
+}
+
+model Group {
+  id          String         @id @default(uuid())
+  name        String         @db.VarChar(200)
+  description String?        @db.Text
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  members     GroupMember[]
+
+  @@unique([name])
+}
+
+model GroupMember {
+  group    Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId  String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  role     GroupRole @default(MEMBER)
+
+  @@unique([groupId, userId])
+}
+
+enum GroupRole {
+  LEADER
+  MEMBER
+}
+
+model Fee {
+  id           String         @id @default(uuid())
+  legalCase    LegalCase      @relation(fields: [legalCaseId], references: [id], onDelete: Cascade)
+  legalCaseId  String
+  amount       Decimal
+  currency     String         @default("USD") @db.VarChar(3)
+  status       PaymentStatus  @default(PENDING)
+  billedAt     DateTime       @default(now())
+  dueDate      DateTime
+  paidAt       DateTime?
+
+  @@index([status])
+  @@index([dueDate])
+}
+
+enum PaymentStatus {
+  DRAFT
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  CANCELLED
+}
+
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String
+  v0    String?
+  v1    String?
+  v2    String?
+  v3    String?
+  v4    String?
+  v5    String?
+
+  @@map("casbin_rule")
+  @@index([ptype])
+}

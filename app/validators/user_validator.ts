@@ -21,7 +21,6 @@ export const UserDataValidator = (data: User) => {
     password: Joi.string().min(4).max(20).required(),
     confirm_password: Joi.ref('password'),
     phone: Joi.string().min(10).max(20).optional(),
-    address: Joi.string().optional(),
     thumbnail: Joi.string().optional(),
     role: Joi.string().valid(...Object.values(UserRole)).default(UserRole.LAWYER),
     sex: Joi.string().valid(...Object.values(Sex))

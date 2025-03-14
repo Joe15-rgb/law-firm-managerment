@@ -1,3 +1,5 @@
+import type { Response } from "express";
+
 // @utils/errors.ts
 export class ErrorWithStatus extends Error {
   public readonly status: number;
@@ -59,3 +61,13 @@ export class ValidationError extends ErrorWithStatus {
     });
   }
 }
+
+ export function handleControllerError(
+      res: Response,
+      error: unknown,
+      message: string,
+      controllerName?: string
+   ) {
+      console.error(`${controllerName} Controller Error:`, error);
+      res.status(500).render('INTERNAL ERROR SERVER', { message });
+   }

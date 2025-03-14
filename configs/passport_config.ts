@@ -31,7 +31,7 @@ const initializePassport = ({
     const user = await getUserByEmail(email);
     if (!user) return done(null, false, { message: 'Invalid Crudentials' });
     try {
-      if (await compare(password, user.password)) return done(null, user);
+      if (await compare(password, user.passwordHash)) return done(null, user);
       return done(null, false, { message: 'Invalid Crudentials' });
     } catch (error) {
       return done(error);

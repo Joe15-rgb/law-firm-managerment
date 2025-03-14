@@ -1,0 +1,107 @@
+<script src="/js/alpine.min.js" defer></script>
+<style>
+   .group-item {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      width: 30%;
+   }
+</style>
+
+<h1>Assigns</h1>
+
+<form action="/treatments/assign" method="post" x-data="setup()">
+   <input type="text" name="actor" id="actor" />
+   <input type="text" name="legalCaseId" id="legalCaseId" />
+   <input type="text" name="actorType" id="actorType" />
+   <details class="group-item">
+      <summary>Dossiers client non assignes</summary>
+      <ul>
+         <% legalCases.data.forEach(legalCase => { %>
+         <li @click="getLegalCaseId('<%= legalCase.id %>')">
+            <span><%= legalCase.title %></span><br />
+            <span><%= legalCase.client.firstName %></span>
+         </li>
+         <% }) %>
+      </ul>
+   </details>
+   <details class="group-item">
+      <summary>Groupe</summary>
+      <ul>
+         <% teams.data.forEach(team => { %>
+         <li @click="getGroupId('<%= team.id%>')">
+            <span><%= team.name %></span>
+            <details>
+               <summary>Membres</summary>
+               <% team.members.forEach(member => { %>
+               <li>
+                  <img
+                     src="/avatars/<%= member.avatarUrl %>"
+                     alt=""
+                     width="20"
+                     height="20"
+                  />
+                  <span><%= member.firstName %></span>
+                  <span><%= member.lastName %></span>
+                  <button><%= member.role %></button>
+               </li>
+               <% }) %>
+            </details>
+         </li>
+         <% }) %>
+      </ul>
+   </details>
+   <details class="group-item">
+      <summary>Personnes</summary>
+      <ul>
+         <% users.forEach(user => { %>
+         <li @click="getUserId('<%= user.id%>')">
+            <img
+               src="/avatars/<%= user.avatarUrl %>"
+               alt=""
+               width="20"
+               height="20"
+            />
+
+            <span><%= user.firstName %></span>
+            <span><%= user.lastName %></span>
+            <button><%= user.role %></button>
+         </li>
+         <% }) %>
+      </ul>
+   </details>
+   <button type="submit">Assign</button>
+</form>
+
+<ul>
+   <h4>Team assigned</h4>
+   <% result.data.teams.forEach(assignTeam => { %>
+   <li><%= assignTeam.id %></li>
+   <% }) %>
+</ul>
+<ul>
+   <h4>User assigned</h4>
+   <% result.data.users.forEach(assignUser => { %>
+   <li><%= assignUser.id %></li>
+   <% }) %>
+</ul>
+
+
+<script>
+   function setup() {
+      return {
+         getLegalCaseId(id) {
+            document.getElementById('legalCaseId').value = id;
+         },
+         getUserId(id) {
+            document.getElementById('actor').name = 'userId';
+            document.getElementById('actor').value = id;
+            document.getElementById('actorType').value = 'USER';
+         },
+         getGroupId(id) {
+            document.getElementById('actor').name = 'groupId';
+            document.getElementById('actor').value = id;
+            document.getElementById('actorType').value = 'GROUP';
+         },
+      };
+   }
+</script>

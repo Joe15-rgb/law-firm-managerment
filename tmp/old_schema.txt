@@ -1,0 +1,205 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id         String     @id @default(uuid())
+  firstName  String     @db.VarChar(40)
+  lastName   String     @db.VarChar(40)
+  email      String     @unique @db.VarChar(50)
+  phone      String     @db.Char(20)
+  address    String?
+  sex        Sex
+  age        Int
+  clientType ClientType
+  cases      Case[]
+  createdAt  DateTime?  @default(now())
+  updatedAt  DateTime?  @updatedAt
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ClientType {
+  INDIVIDUAL
+  COMPANY
+}
+
+model Case {
+  id          String        @id @default(uuid())
+  reference   String        @unique
+  caseNum     Int           @unique @default(autoincrement())
+  title       String
+  clientId    String
+  description String?
+  point       Int
+  urgency     UrgencyCase   @default(LOW)
+  client      Client        @relation(fields: [clientId], references: [id])
+  status      CaseStatus    @default(PENDING)
+  caseType    CaseTypes
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime?     @updatedAt
+  documents   Document[]
+  Appointment Appointment[]
+  Fee         Fee[]
+}
+
+enum CaseTypes {
+  CIV
+  PEN
+  COM
+  TRA
+  ADM
+}
+
+enum UrgencyCase {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum CaseStatus {
+  PENDING
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+model Treatment {
+  id        String     @id @default(uuid())
+  status    CaseStatus @default(PENDING)
+  clientId  String
+  caseId    String
+  userId    String?
+  actorType ActorType?
+
+  @@unique([clientId, userId, caseId, actorType])
+}
+
+enum ActorType {
+  USER
+  TEAM
+}
+
+model User {
+  id           String        @id @default(uuid())
+  firstName    String        @db.VarChar(40)
+  lastName     String        @db.VarChar(40)
+  email        String        @unique @db.VarChar(50)
+  password     String        @db.VarChar(255)
+  phone        String        @db.Char(20)
+  address      String?
+  thumbnail    String?
+  role         UserRole
+  sex          Sex
+  joinedAt     DateTime      @default(now())
+  updatedAt    DateTime?     @updatedAt
+  appointments Appointment[]
+  GroupUser    GroupUser[]
+}
+
+enum UserRole {
+  LAWYER
+  PARALEGAL
+  ADMINISTRATIVE
+}
+
+model Document {
+  id           String       @id @default(uuid())
+  caseId       String
+  fileName     String
+  filePath     String
+  documentType DocumentType
+  case         Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  uploadedAt   DateTime     @default(now())
+  updatedAt    DateTime?    @updatedAt
+}
+
+enum DocumentType {
+  CONTRACT
+  EVIDENCE
+  LETTER
+  OTHER
+}
+
+model Appointment {
+  id       String            @id @default(uuid())
+  caseId   String
+  userId   String
+  dateTime DateTime
+  subject  String
+  status   AppointmentStatus @default(SCHEDULED)
+  case     Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  User     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+model Group {
+  id        String      @id @default(uuid())
+  name      String      @db.VarChar(200)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime?   @updatedAt
+  GroupUser GroupUser[]
+}
+
+model GroupUser {
+  groupId String
+  userid  String
+  role    GroupUserRole? @default(MEMBER)
+  group   Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userid], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userid])
+}
+
+enum GroupUserRole {
+  LEADER
+  MEMBER
+}
+
+model Fee {
+  id            String        @id @default(uuid())
+  caseId        String
+  amount        Decimal
+  paymentStatus PaymentStatus @default(PENDING)
+  billedAt      DateTime      @default(now())
+  case          Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String
+  v0    String?
+  v1    String?
+  v2    String?
+  v3    String?
+  v4    String?
+  v5    String?
+
+  @@map("casbin_rule")
+}

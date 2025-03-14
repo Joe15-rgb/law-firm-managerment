@@ -41,7 +41,7 @@ class Server {
     // Configuration de base essentielle
     this.app.set('trust proxy', 1);
     this.app.use(helmet(helmetConfig));
-    this.app.use(express.static('public', { maxAge: '1y' }));
+    this.app.use(express.static('public'));
     this.app.use(express.urlencoded({ extended: true, limit: '10kb' }));
     this.app.use(express.json({ limit: '10kb' }));
     this.app.use(morgan(this.isProduction ? 'combined' : 'dev'));

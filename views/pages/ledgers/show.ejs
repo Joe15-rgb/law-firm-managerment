@@ -1,0 +1,46 @@
+<h1>Dossier : n°<%= ledger.caseNumber.toString().padStart(3, '0');  %></h1>
+<table border="1">
+  <thead>
+    <tr>
+      <th scope="col" colspan="2"><%= ledger.title %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>reference: </td>
+      <td><%= ledger.reference %></td>
+    </tr>
+    <tr>
+      <td>priority: </td>
+      <td><%= ledger.urgency %></td>
+    </tr>
+    <tr>
+      <td>point: </td>
+      <td><%= ledger.priority %></td>
+    </tr>
+    <tr>
+      <td>Type de dossier: </td>
+      <td><%= ledger.caseType  %></td>
+    </tr>
+    <tr>
+      <td>Status du dossier: </td>
+      <td><%= ledger.status %></td>
+    </tr>
+    <tr>
+      <td>Nom client</td>
+      <td><a href="/clients/<%= ledger.client.id %>"><%= ledger.client.firstName + ' ' + ledger.client.lastName %></a></td>
+    </tr>
+    <tr>
+      <td>Details: </td>
+      <td><%= ledger.description %></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <button type="button">Review</button>
+        <button type="button">Delete</button>
+        <button type="button">assigned To</button>
+      </td>
+    </tr>
+
+  </tbody>
+</table>

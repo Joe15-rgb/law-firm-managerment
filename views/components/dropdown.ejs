@@ -1,0 +1,14 @@
+ <div x-show="activeDropdown === user.id" @click.outside="activeDropdown = null" class="dropdown-menu">
+   <a :href="`/users/${user.id}`" class="dropdown-item">
+     View Profile
+   </a>
+   <a :href="`/users/edit/${user.id}`" class="dropdown-item">
+     Edit Details
+   </a>
+   <button class="dropdown-item" @click="openPermissionsModal(user)">
+     Manage Permissions
+   </button>
+   <button class="dropdown-item danger" @click="confirmDelete(user)">
+     Delete User
+   </button>
+ </div>

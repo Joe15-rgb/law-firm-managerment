@@ -1,4 +1,5 @@
 import { ClientType, Sex, type Client } from '@prisma/client';
+import { City, Country } from '@tools/clientInput';
 import Joi from 'joi';
 
 export const clientValidatorData = (data: Client) => {
@@ -13,8 +14,11 @@ export const clientValidatorData = (data: Client) => {
          .required(),
       email: Joi.string().email().required(),
       phone: Joi.string().min(10).max(20).trim().optional(),
-      address: Joi.string().optional(),
-      age: Joi.number().max(100).required(),
+      birthDate: Joi.date().required(),
+      addressLine1: Joi.string().optional(),
+      addressLine2: Joi.string().optional(),
+      city: Joi.string().valid(...Object.values(City)),
+      country: Joi.string().valid(...Object.values(Country)),
    });
 
    return schema.validate(data);

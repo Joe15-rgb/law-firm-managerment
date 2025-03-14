@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/alpine.min.js" defer></script>
+  <title>Document</title>
+</head>
+
+<body>
+  <h1>Dossier clients</h1>
+  <menu>
+    <li><a href="">Unassigned</a></li>
+    <li><a href="">Need Review</a></li>
+    <li><a href="/treatments">Assigned</a></li>
+    <li><a href="">Completed</a></li>
+    <li><a href="/clients">Clients</a></li>
+  </menu>
+
+  <div class="ledgers" x-data="LedgerApp(<%=JSON.stringify(ledgers.data)%>)">
+    <input type="search" x-model="query" />
+    <template x-for="ledger in findLedger" :key="ledger.id">
+      <li>
+        <span x-text="ledger.title"></span>
+        <span x-text="ledger.reference"></span>
+        <span x-text="ledger.client.firstName"></span>
+        <span x-text="ledger.client.lastName"></span>
+        <a :href="'/ledgers/'+ ledger.id">Voir</a>
+      </li>
+    </template>
+  </div>
+  <form action="/ledgers/new" method="post">
+    <% inputLegalCases.forEach(input => { %>
+    <%- include('../../components/input.ejs', input) %>
+    <% }) %>
+    <input type="text" name="clientId" id="clientId">
+    <div class="clients" x-data="ClientManager(<%= JSON.stringify(clients)%>)">
+      <input type="search" x-model="searchQuery">
+      <ul>
+        <template x-for="client in findClient">
+          <li @click="selectedClient(client.id)">
+            <span x-text="client.firstName + ' ' + client.lastName"></span>
+          </li>
+        </template>
+      </ul>
+    </div>
+    <button type="submit">Enregistre</button>
+  </form>
+  <script>
+    function ClientManager(propos) {
+      return {
+        clients: propos,
+        searchQuery: '',
+        selectedClient(id) {
+          document.getElementById('clientId').value = id
+        },
+
+       findClient() {
+          return this.clients.filter((cli) => cli.firstName.toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase()) ||
+          cli.lastName.toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase())
+          )
+        }
+      }
+    }
+
+    function LedgerApp(data) {
+      return {
+        query: '',
+        ledgers: data,
+        findLedger() {
+          return this.ledgers.filter(
+            (ledger) =>
+            ledger.title
+            .toLocaleLowerCase()
+            .includes(this.query.toLocaleLowerCase()) ||
+            ledger.caseType
+            .toLocaleLowerCase()
+            .includes(this.query.toLocaleLowerCase()) ||
+            ledger.reference
+            .toLocaleLowerCase()
+            .includes(this.query.toLocaleLowerCase()) ||
+            ledger.status
+            .toLocaleLowerCase()
+            .includes(this.query.toLocaleLowerCase()) ||
+            ledger.client.firstName
+            .toLocaleLowerCase()
+            .includes(this.query.toLocaleLowerCase()) ||
+            ledger.client.lastName
+            .toLocaleLowerCase()
+            .includes(this.query.toLocaleLowerCase())
+          );
+        },
+      };
+    }
+  </script>
+</body>
+
+</html>

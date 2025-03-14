@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 import {
-   GroupUserRole,
+   GroupRole,
    PrismaClient,
-   type GroupUser,
+   type GroupMember,
    type User,
 } from '@prisma/client';
 import GroupPrismaService from '@app/services/group_service';
@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 
 interface GroupUserCreateRequest {
    id: string;
-   role: GroupUserRole;
+   role: GroupRole;
 }
 
 interface GroupCreateRequest {
@@ -41,7 +41,7 @@ class GroupControllers {
       }
    }
 
-   static async create(req: Request, res: Response) {
+   static async create(req: Request, res: Response): Promise<void | any> {
       try {
          const { name, users }: GroupCreateRequest = JSON.parse(req.body.data);
 
@@ -52,7 +52,7 @@ class GroupControllers {
          }
 
          // Validation des rôles
-         const validRoles = Object.values(GroupUserRole);
+         const validRoles = Object.values(GroupRole);
          if (users.some((u) => !validRoles.includes(u.role))) {
             return res.status(400).json({ error: 'Invalid role provided' });
          }
@@ -86,7 +86,7 @@ class GroupControllers {
       }
    }
 
-   static async show(req: Request, res: Response) {
+   static async show(req: Request, res: Response): Promise<void | any> {
       try {
          const { id } = req.params;
          const group = await prisma.group.findUnique({
@@ -108,11 +108,17 @@ class GroupControllers {
    static async destroy(req: Request, res: Response) {
       try {
          const { id } = req.params;
-         await service.deleteGroup(id)
+         await service.deleteGroup(id);
          res.status(200).send(' ');
       } catch (error) {
          res.status(500).json({ error: 'Failed to delete group' });
       }
+   }
+
+   static async removeMember(req: Request, res: Response) {
+      const {userId, groupId} = JSON.parse(req.params.ids)
+
+      res.json(await service.removeMemberInGroup(userId, groupId))
    }
 }
 

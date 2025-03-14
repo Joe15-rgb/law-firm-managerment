@@ -6,16 +6,21 @@ import type { Request, Response } from 'express';
 const service = new ClientPrismaService();
 
 class ClientControllers {
-  static async index(req: Request, res: Response){
-    res.status(200).send(await service.getAllClients())
-  }
+   static async index(req: Request, res: Response) {
+      const clients = await service.getAllClients();
+      res.status(200).render('pages/client/index', { clients });
+   }
    static async create(req: Request, res: Response): Promise<void | any> {
       try {
          const { error, value } = clientValidatorData(req.body);
-
          if (error) return res.status(400).send(error.details[0].message);
 
-         const newClient = await service.createClient(value);
+         const data = {
+            ...value,
+            birthDate: new Date(value.birthDate).toISOString(),
+         };
+
+         const newClient = await service.createClient(data);
 
          res.status(201).send(newClient);
       } catch (error) {

@@ -29,12 +29,11 @@ class UserControllers {
             firstName: value.firstName,
             lastName: value.lastName,
             email: value.email,
-            password: value.password,
+            passwordHash: value.password,
             role: value.role,
             sex: value.sex,
             phone: value.phone,
-            address: value.address,
-            thumbnail: value.thumbnail,
+            avatarUrl: value.thumbnail,
          };
          if (error) {
             req.flash('error', error.details[0].message);
@@ -72,12 +71,11 @@ class UserControllers {
             firstName: value.firstName,
             lastName: value.lastName,
             email: value.email,
-            password: value.password,
+            passwordHash: value.password,
             role: value.role,
             sex: value.sex,
             phone: value.phone,
-            address: value.address,
-            thumbnail: value.thumbnail,
+            avatarUrl: value.thumbnail,
          };
          if (error) {
             req.flash('error', error.details[0].message);

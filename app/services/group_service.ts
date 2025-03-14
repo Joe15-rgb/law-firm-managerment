@@ -1,22 +1,22 @@
 import type { ResultData } from '@bases/index';
 import { CACHE_TTL } from '@configs/env_config';
 import {
-   GroupUserRole,
+   GroupRole,
    PrismaClient,
    UserRole,
    type Group,
-   type GroupUser,
+   type GroupMember,
 } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { getCache, invalidateCacheByPrefix, setCache } from '@tools/cache';
-import { ErrorWithStatus } from '@tools/errors';
+import { ErrorWithStatus, NotFoundError } from '@tools/errors';
 import { requestLogger } from '@tools/logger';
 
 type OmittedProperties = 'createdAt' | 'updatedAt';
 
 interface GroupUserCreateRequest {
    id: string;
-   role: GroupUserRole;
+   role: GroupRole;
 }
 
 interface GroupCreateRequest {
@@ -26,8 +26,8 @@ interface GroupCreateRequest {
 
 interface GroupUpdateRequest {
    name?: string;
-   usersToAdd?: Array<{ userid: string; role: GroupUserRole; groupId: string }>;
-   usersToUpdate?: Array<{ userId: string; role: GroupUserRole }>;
+   usersToAdd?: Array<{ userid: string; role: GroupRole; groupId: string }>;
+   usersToUpdate?: Array<{ userId: string; role: GroupRole }>;
    usersToRemove?: string[];
 }
 
@@ -53,15 +53,15 @@ class GroupPrismaService {
             const newGroup = await tx.group.create({ data: { name } });
 
             if (users.length > 0) {
-               const userGroup: GroupUser[] = users.map((user) => {
+               const userGroup: GroupMember[] = users.map((user) => {
                   return {
                      groupId: newGroup.id,
-                     userid: user.id,
+                     userId: user.id,
                      role: user.role,
                   };
                });
 
-               await tx.groupUser.createMany({
+               await tx.groupMember.createMany({
                   data: userGroup,
                });
             }
@@ -69,7 +69,7 @@ class GroupPrismaService {
             return tx.group.findUniqueOrThrow({
                where: { id: newGroup.id },
                include: {
-                  GroupUser: {
+                  members: {
                      include: { user: true },
                      orderBy: { user: { joinedAt: 'desc' } },
                   },
@@ -101,8 +101,9 @@ class GroupPrismaService {
    async getAllGroups(
       page = 1,
       limit = 10,
-      role?: UserRole
-   ): Promise<ResultData<Group>> {
+      id?: string,
+      role?: UserRole,
+   ): Promise<ResultData<any>> {
       const validatedPage = Math.max(1, page);
       const validatedLimit = Math.min(Math.max(limit, 1), 100);
       const cacheKey = `${
@@ -114,9 +115,9 @@ class GroupPrismaService {
       const [groups, total] = await Promise.all([
          this.prisma.group.findMany({
             include: {
-               GroupUser: {
+               members: {
                   include: { user: true },
-                  where: role ? { user: { role } } : undefined,
+                  where: id ? { user: { id } } : undefined,
                },
             },
             skip: (validatedPage - 1) * validatedLimit,
@@ -131,12 +132,12 @@ class GroupPrismaService {
          name: group.name,
          createdAt: group.createdAt,
          updatedAt: group.updatedAt,
-         members: group.GroupUser.map((groupUser) => ({
-            ...groupUser.user,
-            role_group: groupUser.role,
-            role: groupUser.user.role,
+         members: group.members.map((member) => ({
+            ...member.user,
+            role_group: member.role,
+            role: member.user.role,
          })),
-         membersCount: group.GroupUser.length,
+         membersCount: group.members.length,
       }));
 
       const result = {
@@ -157,7 +158,7 @@ class GroupPrismaService {
       return result;
    }
 
-   async getOneGroup(id: string): Promise<Group> {
+   async getOneGroup(id: string): Promise<any> {
       const cacheKey = `${this.CACHE_PREFIX}${id}`;
       const cachedData = await getCache(cacheKey);
 
@@ -166,7 +167,7 @@ class GroupPrismaService {
       const group = await this.prisma.group.findUnique({
          where: { id },
          include: {
-            GroupUser: {
+            members: {
                include: { user: true },
                orderBy: { user: { joinedAt: 'desc' } },
             },
@@ -182,137 +183,47 @@ class GroupPrismaService {
          name: group.name,
          createdAt: group.createdAt,
          updatedAt: group.updatedAt,
-         members: group.GroupUser.map((groupUser) => ({
-            ...groupUser.user,
-            role_group: groupUser.role,
-            role: groupUser.user.role,
+         members: group.members.map((member) => ({
+            ...member.user,
+            role_group: member.role,
+            role: member.user.role,
          })),
-         membersCount: group.GroupUser.length,
+         membersCount: group.members.length,
       };
 
       await setCache(cacheKey, result, this.CACHE_TTL);
       return result;
    }
 
-   //  async updateGroup(
-   //     id: string,
-   //     data: GroupUpdateRequest
-   //  ): Promise<Group & { GroupUser: GroupUser[] }> {
-   //     try {
-   //        const {
-   //           name,
-   //           usersToAdd = [],
-   //           usersToUpdate = [],
-   //           usersToRemove = [],
-   //        } = data;
+   async removeMemberInGroup(userId: string, groupId: string) {
+      try {
+         const member = await this.prisma.groupMember.findFirst({
+            where: {
+               userId,
+               groupId,
+            },
+         });
 
-   //        const updatedGroup = await this.prisma.$transaction(async (tx) => {
-   //           // Vérification de l'existence du groupe
-   //           const existingGroup = await tx.group.findUniqueOrThrow({
-   //              where: { id },
-   //              include: { GroupUser: true },
-   //           });
+         if (!member) {
+            throw new NotFoundError('Member association group not found');
+         }
 
-   //           // Mise à jour du nom si fourni
-   //           if (name && name !== existingGroup.name) {
-   //              await tx.group.update({
-   //                 where: { id },
-   //                 data: { name },
-   //              });
-   //           }
-
-   //           // Opérations batch sur les membres
-   //           const operations = [];
-
-   //           if (usersToAdd.length > 0) {
-   //              operations.push(
-   //                 tx.groupUser.createMany({
-   //                    data: usersToAdd.map((user) => ({
-   //                       groupId: id,
-   //                       userId: user.userid,
-   //                       role: user.role,
-   //                    })),
-   //                    skipDuplicates: true,
-   //                 })
-   //              );
-   //           }
-
-   //           if (usersToUpdate.length > 0) {
-   //              operations.push(
-   //                 ...usersToUpdate.map((user) =>
-   //                    tx.groupUser.update({
-   //                       where: {
-   //                          groupId_userId: {
-   //                             groupId: id,
-   //                             userId: user.userId,
-   //                          },
-   //                       },
-   //                       data: { role: user.role },
-   //                    })
-   //                 )
-   //              );
-   //           }
-
-   //           if (usersToRemove.length > 0) {
-   //              operations.push(
-   //                 tx.groupUser.deleteMany({
-   //                    where: {
-   //                       groupId: id,
-   //                       userId: { in: usersToRemove },
-   //                    },
-   //                 })
-   //              );
-   //           }
-
-   //           await Promise.all(operations);
-
-   //           // Récupération de la version actualisée
-   //           return tx.group.findUniqueOrThrow({
-   //              where: { id },
-   //              include: {
-   //                 GroupUser: {
-   //                    include: { user: true },
-   //                 },
-   //              },
-   //           });
-   //        });
-
-   //        requestLogger('Group updated successfully', {
-   //           groupId: id,
-   //           changes: {
-   //              nameUpdated: name !== undefined,
-   //              membersAdded: usersToAdd.length,
-   //              membersUpdated: usersToUpdate.length,
-   //              membersRemoved: usersToRemove.length,
-   //           },
-   //        });
-
-   //        await Promise.all([
-   //           invalidateCacheByPrefix(`${this.CACHE_PREFIX}${id}`),
-   //           this.invalidateListCache(),
-   //        ]);
-
-   //        return updatedGroup;
-   //     } catch (error) {
-   //        if (error instanceof PrismaClientKnownRequestError) {
-   //           switch (error.code) {
-   //              case 'P2025':
-   //                 throw new ErrorWithStatus('Group not found', 404);
-   //              case 'P2002':
-   //                 throw new ErrorWithStatus('Group name already exists', 409);
-   //              case 'P2016':
-   //                 throw new ErrorWithStatus('Invalid member operation', 400);
-   //           }
-   //        }
-   //        requestLogger('Error updating group', { error, groupId: id });
-   //        throw new ErrorWithStatus('Failed to update group', 500);
-   //     }
-   //  }
+         await this.prisma.$transaction([
+            this.prisma.groupMember.deleteMany({
+               where: {
+                  userId,
+                  groupId,
+               },
+            }),
+         ]);
+         return true;
+      } catch (error) {}
+   }
 
    async deleteGroup(id: string): Promise<void> {
       try {
          await this.prisma.$transaction([
-            this.prisma.groupUser.deleteMany({ where: { groupId: id } }),
+            this.prisma.groupMember.deleteMany({ where: { groupId: id } }),
             this.prisma.group.delete({ where: { id } }),
          ]);
 

@@ -31,14 +31,14 @@ export default class AuthController {
             const userAuth = user as User;
 
             switch (userAuth.role) {
-              case 'ADMINISTRATIVE':
+              case 'ADMIN':
                 res.redirect('/admins');
                 break
               case 'LAWYER':
-                res.redirect('/lawyer');
+                res.redirect('/lawyers');
                 break
               case 'PARALEGAL':
-                res.redirect('/paralegal');
+                res.redirect('/paralegals');
                 break
               default:
                 req.flash('error', 'Rôle utilisateur non reconnu.');

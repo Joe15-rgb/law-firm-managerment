@@ -9,7 +9,7 @@
   * name: string (name and id of the input)
  %>
 
-<% if (["email", "password", "number", "text", "date", "tel"].includes(type)) { %>
+<% if (["email", "password", "number", "text", "date", "tel", "datetime", "datetime-local"].includes(type)) { %>
   <div class="field">
     <label for="<%= name %>"> <%= label %> </label><br>
     <input

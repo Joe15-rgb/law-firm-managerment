@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/js/alpine.min.js" defer></script>
+  <script src="/js/htmx.min.js"></script>
+  <title><%= title %> </title>
+</head>
+<body>
+  <header class="basic-header">
+    <div class="logo">
+      <a href="/">
+        <img src="/assets/scale.svg" alt="logo" width="50" height="50">
+        <span><%= title %> </span>
+      </a>
+    </div>
+    <% if (user) { %>
+    connecté
+     <%#- include('../components/badge', profile) %>
+     <a href="/logout?_method=DELETE">Logout</a>
+    <% } %>
+  </header>

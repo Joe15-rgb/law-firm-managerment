@@ -1,0 +1,49 @@
+<%- include('../../partials/header.ejs') %>
+
+<header>
+  <h1>Clients</h1>
+  <button type="button">+ Add client</button>
+</header>
+<menu>
+  <li><a href="">Individual</a></li>
+  <li><a href="">Company</a></li>
+</menu>
+
+<div class="clients" x-data="ClientManager(<%= JSON.stringify(clients) %>)">
+  <div class="header-client">
+    <h4>All clients <span class="count" x-text="clients.length"></span></h4>
+    <div class="control">
+        <input type="search" x-model="searchQuery">
+    </div>
+  </div>
+  <ul>
+    <template x-for="client in filteredClients">
+      <li x-text="client.firstName"></li>
+    </template>
+  </ul>
+
+</div>
+
+<dialog>
+  <form action="/clients/register" method="post">
+    <% inputClients.forEach(input => { %>
+    <%- include('../../components/input.ejs', input) %>
+    <% }) %>
+    <button type="submit">Enregister</button>
+  </form>
+</dialog>
+
+<script>
+  function ClientManager(props) {
+    return {
+      clients: props.data,
+      searchQuery: '',
+      filteredClients() {
+        return this.clients.filter((client) =>
+          client.firstName.toLocaleLowerCase()
+          .includes(this.searchQuery.toLocaleLowerCase()))
+      }
+    }
+  }
+</script>
+<%- include('../../partials/footer.ejs') %>

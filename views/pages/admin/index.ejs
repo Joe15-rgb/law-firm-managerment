@@ -1,136 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/alpine.min.js" defer></script>
-  <script src="/js/htmx.min.js"></script>
-  <title>Document</title>
-</head>
-<style>
-  .selected {
-    background-color: lightblue;
-    font-weight: bold;
-  }
-
-  .person {
-    cursor: pointer;
-    padding: 5px;
-    border-bottom: 1px solid #ddd;
-  }
-</style>
-
-<body>
-  <div class="group" x-data="GroupApp(<%= JSON.stringify(users) %>)">
-    <form action="/groups" method="post">
-      <div class="field">
-        <label for="name">Nom du groupe:</label>
-        <input type="text" id="name" x-model="name" required />
-        <input type="hidden" name="data"
-          :value="JSON.stringify({ name, users: selectedPersons.map(u => ({id: u.id, role: u.role})) })" />
-      </div>
-      <div class="group_contacts">
-        <h4>Liste du personnel</h4>
-        <label for="search">Rechercher:</label>
-        <input x-model="query" type="search" id="search" />
-        <ul class="persons">
-          <template x-for="person in findPerson" :key="person.id">
-            <li class="person" :class="selectedPersons.includes(person) ? 'selected' : ''">
-              <input type="checkbox" @click="togglePerson(person)" />
-              <span x-text="person.firstName"></span>
-              <span x-text="person.lastName"></span>
-              <span x-text="person.email"></span>
-              <span x-text="person.role"></span>
-            </li>
-          </template>
-        </ul>
-        <h4>conctats selectionné: <span x-text="name"></span></h4>
-        <ul>
-          <template x-for="p in selectedPersons" :key="p.id">
-            <li class="person">
-              <span x-text="p.firstName"></span>
-              <span x-text="p.lastName"></span>
-              <span x-text="p.email"></span>
-              <select x-on:change="updateRole(p.id, $event.target.value)">
-                <% groupUserRoles.forEach(role=> { %>
-                  <option value="<%= role %>" <%=role==='MEMBER' ? 'selected' : '' %>><%= role %>
-                  </option>
-                  <% }) %>
-              </select>
-            </li>
-          </template>
-        </ul>
-      </div>
-      <button type="submit">Crée un nouveau groupe</button>
-    </form>
+<%- include('../../partials/header.ejs') %>
+<main class="main">
+  <header>
+    <h1>Dashbaord <%= user?.role %></h1>
+    <div class="banner">
+      <p>
+        Welcome, <b><%= user?.firstName %></b>! Today is <%=
+        luxon.DateTime.now().toLocaleString(luxon.DateTime.DATETIME_MED) %>.
+      </p>
+    </div>
+  </header>
+  <div class="cards">
+    <% cardData.forEach(card => {%>
+      <%- include('../../components/card-admin', card) %>
+    <% })%>
   </div>
-  <h3>Liste de groupes créés</h3>
-  <% groups.data.forEach(group=> { %>
-    <li class="person" id="group_<%= group.id %>">
-      <b>
-        <%= group.name %>
-      </b>
-      <details>
-        <% group.members.forEach(member=> { %>
-          <div class="user">
-          <span>
-            <%= member.firstName %>
-          </span>
-          <button><%= member.role %></button>
-          </div>
-          <% }) %>
-      </details>
-      <button
-      hx-delete="/groups/<%= group.id %>"
-      hx-target="#group_<%= group.id %>"
-      hx-swap="outerHTML"
-      type="button">Supprimer</button>
-    </li>
-    <% }) %>
-      <script>
-        function GroupApp(data) {
-          return {
-            name: '',
-            query: '',
-            persons: data,
-            selectedPersons: [],
-            togglePerson(person) {
-              const index = this.selectedPersons.findIndex(
-                (p) => p.id === person.id
-              );
-              if (index === -1) {
-                this.selectedPersons.push({ ...person, role: 'MEMBER' });
-              } else {
-                this.selectedPersons.splice(index, 1);
-              }
-            },
-            updateRole(personId, role) {
-              let person = this.selectedPersons.find((p) =>
-                p.id === personId
-              )
-              if (person) {
-                person.role = role
-              }
-            },
-            get findPerson() {
-              return this.persons.filter(
-                (p) =>
-                  p.firstName
-                    .toLowerCase()
-                    .includes(this.query.toLowerCase()) ||
-                  p.lastName
-                    .toLowerCase()
-                    .includes(this.query.toLowerCase()) ||
-                  p.email
-                    .toLowerCase()
-                    .includes(this.query.toLowerCase()) ||
-                  p.role.toLowerCase().includes(this.query.toLowerCase())
-              );
-            },
-          };
-        }
-      </script>
-</body>
-
-</html>
+</main>
+<%- include('../../partials/footer.ejs') %>

@@ -1,0 +1,19 @@
+<div class="setting">
+  <div class="icon">
+    <img src="/assets/profile.svg" alt="user-icon" />
+  </div>
+  <div class="info">
+    <h3><%= user.firstName %></h3>
+    <p><%= user.role %></p>
+  </div>
+  <div class="actions">
+    <button type="button">Dark Mode</button>
+    <button type="button">About</button>
+    <form
+      @submit.prevent="if(confirm('Voulez-vous vraiment vous déconnect?')) $event.target.submit()"
+      action="/logout?_method=DELETE"
+      method="post">
+      <button type="submit">Déconnexion</button>
+    </form>
+  </div>
+</div>

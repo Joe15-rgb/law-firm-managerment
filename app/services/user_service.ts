@@ -3,18 +3,17 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { getCache, invalidateCacheByPrefix, setCache } from '@tools/cache';
 import { ErrorWithStatus, NotFoundError } from '@tools/errors';
 import { cuid, deletePublicFile, serializePassword } from '@tools/helpers';
-import { generateAvatar } from '@tools/jdenticon';
+import { generateAvatar } from '@tools/avatarGenerator';
 import { requestLogger } from '@tools/logger';
 import type { ResultData } from '@bases/index';
-import { CACHE_TTL } from '@configs/env_config';
 
 type OmitPropritys = 'id' | 'joinedAt' | 'updatedAt';
 
 class UserPrismaServices {
-   private CACHE_TTL = CACHE_TTL;
+   private CACHE_TTL = 600;
    private CACHE_PREFIX = 'user:';
    private LIST_CACHE_PREFIX = 'users:all:';
-   private PATH_USER_THUMBNAIL = 'public/users';
+   private PATH_USER_THUMBNAIL = 'public/avatars';
    private prisma: PrismaClient;
 
    constructor(prisma?: PrismaClient) {
@@ -45,10 +44,10 @@ class UserPrismaServices {
 
    async createUser(data: Omit<User, OmitPropritys>): Promise<User | void> {
       try {
-         const userData: Partial<User> = {
+         const userData: Omit<User, OmitPropritys> = {
             ...data,
-            thumbnail: generateAvatar(`${data.firstName}_${cuid()}`),
-            password: serializePassword(data.password),
+            avatarUrl: generateAvatar(`${data.firstName}_${cuid()}`),
+            passwordHash: serializePassword(data.passwordHash),
          };
          if (await this.verifyIfUserExistInDatabase(data.email))
             throw new ErrorWithStatus(
@@ -56,7 +55,7 @@ class UserPrismaServices {
                400
             );
          const newUser = await this.prisma.user.create({
-            data: userData as User,
+            data: userData,
          });
 
          requestLogger('User created', {
@@ -84,18 +83,6 @@ class UserPrismaServices {
       const cacheKey = `${this.CACHE_PREFIX}${id}`;
       const cachedData: User = await getCache(cacheKey);
 
-      if (cachedData) {
-         const dbTimestamp = await this.prisma.user.findUnique({
-            where: { id },
-            select: { updatedAt: true },
-         });
-         if (
-            dbTimestamp?.updatedAt?.toISOString() ===
-            cachedData.updatedAt?.toISOString()
-         ) {
-            return cachedData;
-         }
-      }
       const user = await this.prisma.user.findUnique({
          where: { id },
       });
@@ -105,11 +92,19 @@ class UserPrismaServices {
          throw new NotFoundError('User non trouvé');
       }
 
+      if (JSON.stringify(user) === JSON.stringify(cachedData)) {
+         return cachedData
+      }
+
       await setCache(cacheKey, user, this.CACHE_TTL);
       return user;
    }
 
-   async getAllUsers(page = 1, limit = 10, role?: UserRole): Promise<ResultData<User>> {
+   async getAllUsers(
+      page = 1,
+      limit = 10,
+      role?: UserRole
+   ): Promise<ResultData<User>> {
       const validatedPage = Math.max(1, page);
       const validatedLimit = Math.min(Math.max(limit, 1), 100);
       const cacheKey = `${this.LIST_CACHE_PREFIX}${validatedPage}:${validatedLimit}`;
@@ -118,7 +113,7 @@ class UserPrismaServices {
       const [users, total] = await Promise.all([
          this.prisma.user.findMany({
             where: {
-               role
+               role,
             },
             skip: (validatedPage - 1) * validatedLimit,
             take: validatedLimit,
@@ -147,12 +142,12 @@ class UserPrismaServices {
             where: { id },
             select: {
                firstName: true,
-               thumbnail: true,
+               avatarUrl: true,
             },
          });
          if (data.firstName && user?.firstName !== data.firstName) {
-            deletePublicFile(user?.firstName!, this.PATH_USER_THUMBNAIL);
-            data.thumbnail = generateAvatar(`${data.firstName}_${cuid()}`);
+            deletePublicFile(user?.avatarUrl!, this.PATH_USER_THUMBNAIL);
+            data.avatarUrl = generateAvatar(`${data.firstName}_${cuid()}`);
          }
          const userUpdated = await this.prisma.user.update({
             where: { id },
@@ -187,15 +182,14 @@ class UserPrismaServices {
          const user = await this.prisma.user.findUnique({
             where: { id },
             select: {
-               firstName: true,
-               thumbnail: true,
+               avatarUrl: true,
             },
          });
          if (!user) {
             throw new NotFoundError('User non trouvé');
          }
          await Promise.all([
-            deletePublicFile(user?.firstName!, this.PATH_USER_THUMBNAIL),
+            deletePublicFile(user?.avatarUrl!, this.PATH_USER_THUMBNAIL),
             await this.prisma.user.delete({ where: { id } }),
 
             invalidateCacheByPrefix(`${this.CACHE_PREFIX}${id}`),

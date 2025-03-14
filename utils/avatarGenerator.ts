@@ -10,7 +10,7 @@ export function generateAvatar(name: string): string | null {
 
     const username = name.toLowerCase().replace(/\s+/g, '');
     const png = toPng(username, 100);
-    const dirPath = path.resolve('public', 'users');
+    const dirPath = path.resolve('public', 'avatars');
     const filePath = path.join(dirPath, `${username}.png`);
 
     // Ensure the directory exists

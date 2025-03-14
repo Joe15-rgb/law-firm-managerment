@@ -68,23 +68,17 @@ export const fieldUsers: Array<UserInputField | UserOtherField> = [
       selectedOption: 'MALE',
    },
    {
-    type: 'textarea',
-    name: 'address',
-    value: '',
-    label: 'Entrez votre address',
-   },
-   {
     type: 'password',
     name: 'password',
     label: 'Entrez votre password',
     value:'',
-    placeholder: 'password'
+    placeholder: 'passwordHash'
    },
     {
     type: 'password',
     name: 'confirm_password',
     label: 'Confirmez votre password',
     value:'',
-    placeholder: 'password'
+    placeholder: 'passwordHash'
    }
 ];

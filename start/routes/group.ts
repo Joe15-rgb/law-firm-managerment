@@ -12,4 +12,7 @@ router.route('/:id')
 .delete(GroupControllers.destroy)
 
 
+router.route('/remove_member/:ids')
+.delete(GroupControllers.removeMember)
+
 export default router

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Law Firm Management Dashboard - Case management system">
+    <title>Law Firm Management Suite v1.0</title>
+    <style>
+        /* Configuration */
+        :root {
+            --primary-color: #2A3F54;
+            --secondary-color: #1ABB9C;
+            --accent-color: #3498DB;
+            --text-light: #ECF0F1;
+            --background: #F8F9FA;
+            --sidebar-width: 280px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Reset et base */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            line-height: 1.5;
+            background-color: var(--background);
+            color: var(--primary-color);
+        }
+
+        /* Layout principal */
+        .app-container {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--primary-color);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .branding {
+            color: var(--text-light);
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .branding__title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .branding__version {
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-section__title {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem;
+            border-radius: var(--border-radius);
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            background: rgba(255, 255, 255, 0.05);
+            outline: none;
+        }
+
+        .nav-link--active {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        .nav-link--active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60%;
+            width: 3px;
+            background: var(--text-light);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-link__icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 1.75;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            padding: 2rem;
+            background: var(--background);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Cartes de statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card__title {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card__value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Tableau récent */
+        .recent-cases {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* SVG Sprites inline */
+        .svg-icons {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- SVG Sprite pour les icônes -->
+    <svg class="svg-icons">
+        <symbol id="icon-dashboard" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+        </symbol>
+        <!-- Ajouter d'autres symboles d'icônes ici -->
+    </svg>
+
+    <div class="app-container">
+        <nav class="sidebar" aria-label="Navigation principale">
+            <div class="branding">
+                <h1 class="branding__title">LAW FIRM</h1>
+                <span class="branding__version">v1.0</span>
+            </div>
+
+            <div class="nav-section">
+                <h2 class="nav-section__title">General</h2>
+                <a href="#" class="nav-link nav-link--active">
+                    <svg class="nav-link__icon">
+                        <use href="#icon-dashboard" />
+                    </svg>
+                    Dashboard
+                </a> <a href="#" class="nav-link nav-link--active">
+                    <svg class="nav-link__icon">
+                        <use href="#icon-dashboard" />
+                    </svg>
+                    Dashboard
+                </a> <a href="#" class="nav-link nav-link--active">
+                    <svg class="nav-link__icon">
+                        <use href="#icon-dashboard" />
+                    </svg>
+                    Dashboard
+                </a> <a href="#" class="nav-link nav-link--active">
+                    <svg class="nav-link__icon">
+                        <use href="#icon-dashboard" />
+                    </svg>
+                    Dashboard
+                </a>
+
+                <!-- Répéter pour chaque élément de menu -->
+            </div>
+
+            <div class="nav-section">
+                <h2 class="nav-section__title">Case Management</h2>
+                <!-- Éléments de navigation -->
+            </div>
+
+            <div class="nav-section">
+                <h2 class="nav-section__title">Administration</h2>
+                <!-- Éléments de navigation -->
+            </div>
+        </nav>
+
+        <main class="main-content" role="main">
+            <header class="dashboard-header">
+                <h2 class="dashboard-title">Dashboard Overview</h2>
+                <div class="user-profile">
+                    <!-- Composant profil utilisateur -->
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <h3 class="stat-card__title">Active Cases</h3>
+                    <p class="stat-card__value">142</p>
+                </article>
+                <!-- Ajouter d'autres cartes -->
+            </div>
+
+            <section class="recent-cases">
+                <h3>Recent Case Activity</h3>
+                <!-- Tableau des cas -->
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Scripts de base pour l'interactivité
+        document.addEventListener('DOMContentLoaded', () => {
+            // Gestion des états actifs
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('nav-link--active'));
+                    e.currentTarget.classList.add('nav-link--active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
