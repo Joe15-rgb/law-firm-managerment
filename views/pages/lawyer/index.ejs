@@ -1,68 +1,7 @@
 <%- include('../../partials/header.ejs') %>
-<style>
-*, *::before, *::after{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-  li{
-    list-style: none;
-  }
-  button{
-    appearance: button;
-    border: none;
-  }
+<%- include('../../components/lawyer-header.ejs', user) %>
+<%- include('../../components/calendar-appointment.ejs') %>
 
-  .onglet{
-    width: 100px;
-    height: 40px;
-    cursor: pointer;
-  }
-  .onglet.active {
-    background-color: red;
-  }
-
-  .content {
-    display: none;
-    border: 1px solid red;
-    margin: .5rem 0;
-    padding: 1rem;
-  }
-
-  .content.active {
-    display: block;
-  }
-
-  .ledgerContent{
-    width: 80%;
-    margin: 0 auto;
-  }
-
-  .content, .type-ledger{
-    width: 100%;
-  }
-  .type-ledger{
-    padding: .5rem;
-    border: 1px solid red;
-
-  }
-  .ledger-item{
-    width: 100%;
-    height: 40px;
-    border: 1px solid red;
-    position: relative;
-    margin: .5rem 0;
-  }
-
-  .ledger-item .dropdown{
-    border: 1px solid red;
-    background-color: red;
-    position: absolute;
-    right: 0;
-    z-index: 2;
-  }
-
-</style>
 <div class="ledgerContent" x-data="LegalCaseManagement(<%= JSON.stringify(ledgers) %>, <%= JSON.stringify(ledgersGroup) %>)">
   <div class="type-ledger">
     <button class="onglet active" @click="checkIsActive($el)">
@@ -73,36 +12,37 @@
     </button>
     <button class="onglet" @click="checkIsActive($el)">My Stats</button>
   </div>
+
   <ul class="content active">
-    <input type="search" x-model="searchQuery">
+    <input class="search-field" type="search" x-model="searchQuery" placeholder="Rechercher dossier...">
     <template x-for="ledger in filteredLegalCases" :key="ledger.id">
       <li class="ledger-item">
         <input type="checkbox">
-        <span x-text="ledger.legalCase.title"></span>
-        <span x-text="ledger.legalCase.status"></span>
-        <span x-text="ledger.legalCase.urgency"></span>
-        <span x-text="ledger.legalCase.priority"></span>
-        <button @click="toggleDropdown(ledger.id)">:</button>
-        <div class="dropdown" x-show="activeDropdown === ledger.id" @click.outside="activeDropdown = null">
-          <ul>
-            <li>Fixe un rendez-vous</li>
-            <li>Ajouter les element au dossier</li>
-            <li>Demande de revision</li>
-            <li>Completer le dossier</li>
-            <li>Archiver le dossier</li>
-          </ul>
-        </div>
+        <p x-text="ledger.legalCase.title"></p>
+        <button class="status-legder" x-text="ledger.legalCase.status"></button>
+        <p x-text="ledger.legalCase.urgency"></p>
+        <p x-text="ledger.legalCase.priority"></p>
+        <button class="btn-transparent elipse" @click="toggleDropdown(ledger.id)">⋮</button>
+        <%- include('../../components/dropdown-ledger.ejs') %>
       </li>
-
+    </template>
+    <template x-if="filteredLegalCases().length == 0">
+      <div class="not-found-ledger">
+        <h4>Aucun dossier trouver avec <a href="http://google.com" x-text="searchQuery"></a> les titres ou informations </h4>
+      </div>
     </template>
   </ul>
+
   <ul class="content">
     <template x-for="ledgersGroup in ledgersGroups">
-      <li>
-        <span x-text="ledgersGroup.legalCase.title"></span>
-        <span x-text="ledgersGroup.legalCase.status"></span>
-        <span x-text="ledgersGroup.legalCase.urgency"></span>
-        <span x-text="ledgersGroup.legalCase.priority"></span>
+      <li class="ledger-item">
+        <input type="checkbox">
+        <p x-text="ledgersGroup.legalCase.title"></p>
+        <button class="status-legder" x-text="ledgersGroup.legalCase.status"></button>
+        <button x-text="ledgersGroup.legalCase.urgency"></button>
+        <p x-text="ledgersGroup.legalCase.priority"></p>
+        <button class="btn-transparent elipse" @click="toggleDropdown(ledgersGroup.legalCase.id)">⋮</button>
+        <%- include('../../components/dropdown-ledger.ejs') %>
       </li>
     </template>
   </ul>
@@ -110,13 +50,15 @@
     my stats
   </ul>
 </div>
-<dialog>
-  <form action="/appointments/new" method="post">
+<dialog class="modal">
+  <div class="modal-header">
+    <h3>Rendez-vous</h3>
+    <button class="btn-transparent close" hx-on:click="document.querySelector('.modal').close()">&times;</button>
+  </div>
+  <form class="form" action="/appointments/new" method="post">
     <% inputsAppointments.forEach(input => { %>
     <%- include('../../components/input', input) %>
     <% }) %>
-    <label for="week">What week would you like to start?</label><br>
-    <input id="week" type="week" name="week" />
     <button type="submit">Fixe</button>
   </form>
 </dialog>
@@ -127,10 +69,12 @@
       legalCases: propos.data,
       ledgersGroups: propos2,
       activeDropdown: null,
+      modal: document.querySelector('.modal'),
 
       toggleDropdown(ledgerId) {
         this.activeDropdown = this.activeDropdown === ledgerId ? null : ledgerId;
       },
+
       checkIsActive(value) {
         const onglets = Array.from(document.querySelectorAll('.onglet'))
         const contentOnglets = document.querySelectorAll('.content')
@@ -145,12 +89,14 @@
           content.classList.add(status)
         )
       },
-
-
+      openModal() {
+        this.modal.showModal()
+      },
       filteredLegalCases() {
         const searchTerm = this.searchQuery.toLowerCase();
-        return this.legalCases.filter(legalCase => ['title', 'status', 'urgency'].some(prop => legalCase.legalCase[prop].toLowerCase().includes(searchTerm)))
-      }
+        return this.legalCases.filter(legalCase => ['title', 'status', 'urgency'].some(prop =>
+          legalCase.legalCase[prop].toLowerCase().includes(searchTerm)))
+      },
     }
   }
 </script>

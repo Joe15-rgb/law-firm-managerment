@@ -11,7 +11,7 @@
 
 <% if (["email", "password", "number", "text", "date", "tel", "datetime", "datetime-local"].includes(type)) { %>
   <div class="field">
-    <label for="<%= name %>"> <%= label %> </label><br>
+    <label for="<%= name %>"> <%= label %> </label>
     <input
       type="<%= type %>"
       name="<%= name %>"
@@ -22,7 +22,7 @@
   </div>
 <% } else if (type === "select" && Array.isArray(value)) { %>
   <div class="field">
-    <label for="<%= name %>"> <%= label %> </label><br>
+    <label for="<%= name %>"> <%= label %> </label>
     <select name="<%= name %>" id="<%= name %>">
       <% value.forEach(option => { %>
         <option <%= option === selectedOption ? 'selected' : '' %> value="<%= option %>">
@@ -33,7 +33,7 @@
   </div>
 <% } else if (type === 'textarea') { %>
  <div class="field">
-    <label for="<%= name %>"> <%= label %> </label><br>
+    <label for="<%= name %>"> <%= label %> </label>
     <textarea name="<%= name %>" id="<%= name %>">
       <%= typeof value !== 'undefined' ? value : '' %>
     </textarea>

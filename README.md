@@ -1,4 +1,4 @@
-# law_firm_managerment
+# law_firm
 
 To install dependencies:
 

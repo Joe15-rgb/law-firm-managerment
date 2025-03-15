@@ -1,34 +1,25 @@
 <%- include('../partials/header') %>
-  <%- include('../partials/flash') %>
+<%- include('../partials/flash') %>
+
+
+<div class="main">
   <h1>Connexion</h1>
 
-<form action="/" method="post">
-  <div class="field">
-    <label for="email">Entrez votre adresse email</label>
-    <input
-    type="email"
-    name="email"
-    id="email"
-    placeholder="Email"
-    required
-    />
-  </div>
-  <div class="field">
-    <label for="password">Entrez votre mot de passe</label>
-    <input
-      type="password"
-      name="password"
-      id="password"
-      maxlength="20"
-      minlength="4"
-      placeholder="Password"
-      required
-    />
-  </div>
-  <button type="submit">Connexion</button>
+  <form class="form login" action="/" method="post" >
+    <div class="field">
+      <label for="email">Entrez votre adresse email</label>
+      <input type="email" name="email" id="email" placeholder="Email" required />
+    </div>
+    <div class="field">
+      <label for="password">Entrez votre mot de passe</label>
+      <input type="password" name="password" id="password" maxlength="20" minlength="4" placeholder="Password" required />
+    </div>
+    <button type="submit">Connexion</button>
 
-  <a href="/forgot">Mot de passe oublié?</a>
-</form>
+    <a href="/forgot">Mot de passe oublié?</a>
+  </form>
+
+
+</div>
 
 <%- include('../partials/footer') %>
-
