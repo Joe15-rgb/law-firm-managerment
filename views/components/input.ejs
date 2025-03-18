@@ -17,7 +17,7 @@
       name="<%= name %>"
       id="<%= name %>"
       value="<%= typeof value !== 'undefined' ? value : '' %>"
-      placeholder="<%= name %> "
+      placeholder="<%= typeof placeholder !== 'undefined' ?  placeholder : name %> "
     />
   </div>
 <% } else if (type === "select" && Array.isArray(value)) { %>

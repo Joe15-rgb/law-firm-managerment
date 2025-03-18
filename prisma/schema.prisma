@@ -143,10 +143,13 @@ model Document {
   id           String       @id @default(uuid())
   legalCase    LegalCase    @relation(fields: [legalCaseId], references: [id], onDelete: Cascade)
   legalCaseId  String
+  title        String       @db.VarChar(150)
   fileName     String       @db.VarChar(255)
-  fileUrl      String // Renommage de filePath pour clarification
+  fileUrl      String
   mimeType     String       @db.VarChar(50)
   documentType DocumentType
+  description  String?
+  size         Int?
   uploadedAt   DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 

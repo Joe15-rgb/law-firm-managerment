@@ -1,19 +1,31 @@
 <%#***************************
  * THIS FOR FLASH MESSAGES *
- ***************************%> 
+ ***************************%>
 
- <% if (messages.error) { %>
-  <div class="message error"><%= messages.error %></div>
- <% } %> 
- 
- <% if (messages.warn) { %>
-  <div class="message warn"><%= messages.warn %></div>
- <% } %> 
- 
- <% if (messages.success) { %>
-  <div class="message success"><%= messages.success %></div>
- <% } %> 
- 
- <% if (messages.info) { %>
-  <div class="message info"><%= messages.info %></div>
- <% } %>
+<% if (messages.error) { %>
+<div class="message error">
+  <p><%= messages.error %></p>
+  <span>&times;</span>
+</div>
+<% } %>
+
+<% if (messages.warn) { %>
+<div class="message warn">
+  <p><%= messages.warn %></p>
+  <span>&times;</span>
+</div>
+<% } %>
+
+<% if (messages.success) { %>
+<div class="message success">
+  <p><%= messages.success %></p>
+  <span>&times;</span>
+</div>
+<% } %>
+
+<% if (messages.info) { %>
+<div class="message info">
+  <p><%= messages.info %></p>
+  <span>&times;</span>
+</div>
+<% } %>

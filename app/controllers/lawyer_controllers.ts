@@ -13,18 +13,17 @@ class LawyerControllers {
 
       const userAuthenticated = req.user as User;
 
-      // TODO: Implémenter la pagination et la recherche dans les services
       const [assignedLedgers, groups, groupLedgers] = await Promise.all([
         service.getAssignedLedgersByCurrentLawyer(userAuthenticated.id),
         service.getGroupsWhereLawyerIsMember(userAuthenticated.id),
         service.getGroupAssignedLedgersByCurrentLawyer(userAuthenticated.id)
       ]);
+      // res.json(groups)
 
       res.status(200).render('pages/lawyer/index', {
         ledgers: assignedLedgers,
         groups,
         ledgersGroup: groupLedgers,
-        userAuthenticated,
         currentPage: parsedPage,
         itemsPerPage: parsedLimit
       });

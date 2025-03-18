@@ -29,7 +29,8 @@
       "@tools/*": ["./utils/*"],
       "@app/*": ["./app/*"],
       "@bases/*": ["./@types/*"],
-      "@db/*": ["./prisma/*"]
+      "@db/*": ["./prisma/*"],
+      "@services/*": ["./services/*"]
     }
   }
 }

@@ -1,5 +1,60 @@
 <%- include('../../partials/header.ejs') %>
-<main class="main-ledgers">
+<style>
+  .card-ledger-list {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-rows: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 1rem;
+  }
+
+  .card-ledger-item {
+    background-color: var(--background-color);
+    box-shadow: var(--box-shadow-2);
+    padding: 1rem;
+    border-radius: 3px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .card-ledger-item .client {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .card-ledger-item .title {
+    background: #dddfe0;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+
+  .card-ledger-item .client img {
+    width: 40px;
+    height: 40px;
+    padding: 0.5rem;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    background-color: #333;
+  }
+
+  .controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+  }
+  .controls .controls-action{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+</style>
+<main class="body-with-sidebar">
   <menu class="sidebar">
     <li><a href="">Unassigned</a></li>
     <li><a href="">Need Review</a></li>
@@ -11,18 +66,28 @@
   <div class="ledgers" x-data="LedgerApp(<%=JSON.stringify(ledgers.data)%>)">
     <div class="controls">
       <h1>Dossier clients (<span x-text="ledgers.length"></span>)</h1>
-      <input type="search" x-model="query" />
-      <button type="button" @click="openModal()">Add Legal Case</button>
+      <div class="controls-action">
+        <%- include('../../components/search-field.ejs') %>
+        <button type="button" @click="openModal()">Add Legal Case</button>
+      </div>
     </div>
-    <template x-for="ledger in findLedger" :key="ledger.id">
-      <li>
-        <span x-text="ledger.title"></span>
-        <span x-text="ledger.reference"></span>
-        <span x-text="ledger.client.firstName"></span>
-        <span x-text="ledger.client.lastName"></span>
-        <a :href="'/ledgers/'+ ledger.id">Voir</a>
-      </li>
-    </template>
+    <div class="card-ledger-list">
+      <template x-for="ledger in findLedger" :key="ledger.id">
+        <div class="card-ledger-item" :data-reference="ledger.reference">
+          <h3 class="title" x-text="ledger.title"></h3>
+          <div class="client">
+            <img src="/assets/profile.svg" alt="">
+            <div class="client_info">
+              <b x-text="ledger.client.firstName + ' ' + ledger.client.lastName "></b><br>
+              <span x-text="ledger.client.email"></span>
+            </div>
+          </div>
+          <button type="button" class="button">
+            <a :href="'/ledgers/'+ ledger.id">Voir</a>
+          </button>
+          </ldiv>
+      </template>
+    </div>
   </div>
 
 
@@ -30,7 +95,7 @@
 <dialog class="modal ledger">
   <div class="modal-header">
     <h2>Ouverture du dossier <a id="client"></a></h2>
-    <button class="btn-transparent">&times;</button>
+    <button hx-on:click="document.querySelector('.modal').close()" class="btn-transparent">&times;</button>
   </div>
   <div class="content">
     <div class="contenair-client-list">

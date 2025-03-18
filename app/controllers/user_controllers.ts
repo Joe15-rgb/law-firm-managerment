@@ -37,15 +37,17 @@ class UserControllers {
          };
          if (error) {
             req.flash('error', error.details[0].message);
-            return res.status(400).send(error.details[0].message);
+            return res.status(400).redirect('/users');
          }
          if (await emailUserIsUnique(value.email)) {
+            req.flash('error', `${value.email} - Cette adresse email est déjà utilisé`)
             return res
-               .status(400)
-               .send(`${value.email} - Cette adresse email est déjà utilisé`);
+               .status(400).redirect('/users');
          }
          const user = await service.createUser(payload as User);
-         res.status(201).send(user);
+
+         req.flash('success', 'Utilisateur ajouter avec succès!')
+         res.status(201).redirect('/users');
       } catch (error) {
          UserControllers.handleControllerError(
             res,
@@ -79,11 +81,11 @@ class UserControllers {
          };
          if (error) {
             req.flash('error', error.details[0].message);
-            return res.status(400).send(error.details[0].message);
+            return res.status(400).redirect(`/users`);
          }
 
          const userUpdate = await service.updateUser(id, payload);
-         res.status(200).send(userUpdate);
+         res.status(200).redirect(`/users/${userUpdate.id}`);
       } catch (error) {
          UserControllers.handleControllerError(
             res,
@@ -106,7 +108,7 @@ class UserControllers {
 
          if (!userDestroyed) {
             req.flash('error', 'Utilisateur est non supprimé');
-            return res.status(500).redirect('/users');
+            return res.status(500).redirect('/users/register');
          }
          req.flash('success', 'Utilisateur supprimé avec succes!');
          return res.status(200).send('');
@@ -135,7 +137,7 @@ class UserControllers {
       } catch (error) {
          if (error instanceof ErrorWithStatus && error.status === 404) {
             req.flash('error', 'Utilisateur non trouvé');
-            return res.status(404).redirect('/users');
+            return res.status(404).redirect('/users/register');
          }
 
          UserControllers.handleControllerError(

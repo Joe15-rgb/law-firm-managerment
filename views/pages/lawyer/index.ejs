@@ -14,7 +14,7 @@
   </div>
 
   <ul class="content active">
-    <input class="search-field" type="search" x-model="searchQuery" placeholder="Rechercher dossier...">
+    <%- include('../../components/search-field') %>
     <template x-for="ledger in filteredLegalCases" :key="ledger.id">
       <li class="ledger-item">
         <input type="checkbox">
@@ -45,10 +45,30 @@
         <%- include('../../components/dropdown-ledger.ejs') %>
       </li>
     </template>
+        <template x-if="ledgersGroups.length == 0">
+      <div class="not-found-ledger">
+        <h4>Aucun dossier est assigned a vos groupes </h4>
+      </div>
+    </template>
   </ul>
   <ul class="content">
     my stats
   </ul>
+</div>
+<div class="teams-container">
+  <h2>Team your are is member</h2>
+  <% groups.forEach(group => { %>
+   <div class="group-item">
+      <h4 class="name-group"><%= group.name  %></h4>
+      <div class="member-avatar-list">
+        <% group.members.forEach(member => { %>
+          <img src="/avatars/<%= member.user.avatarUrl %>" alt="<%= member.user.firstName %>">
+        <% }) %>
+      </div>
+      <button class="btn-transparent" type="button">⋮</button>
+   </div>
+  <% }) %>
+
 </div>
 <dialog class="modal">
   <div class="modal-header">

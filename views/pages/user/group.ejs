@@ -1,0 +1,314 @@
+<%- include('../../partials/header.ejs') %>
+
+<style>
+  .selected {
+    background-color: lightblue;
+    font-weight: bold;
+  }
+
+  .person {
+    cursor: pointer;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .modal.group {
+    width: 70%;
+    max-width: 100%;
+    margin: 5% auto;
+  }
+
+  .group_app {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    padding: 1rem;
+    gap: 15px;
+  }
+
+  .persons-list {
+    padding: .5rem 0;
+    height: 300px;
+    overflow-y: auto;
+  }
+
+  .persons-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .persons-list .person-item {
+    display: grid;
+    grid-template-columns: 20px 40px 1fr 120px;
+    align-items: center;
+    gap: 10px;
+    padding: .5rem 0;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .role {
+    color: white;
+    padding: .5rem;
+    border-radius: 3px;
+  }
+
+  .role[data-role="ADMIN"] {
+    background: #e74e4e;
+  }
+
+  .role[data-role="LAWYER"] {
+    background: #3498db;
+  }
+
+  .role[data-role="PARALEGAL"] {
+    background: #b8521f;
+  }
+
+  .persons-list .person-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #333;
+  }
+
+  .persons-list .person-item .role {
+    display: inline-block;
+    padding: .6rem;
+    border-radius: 3px;
+  }
+
+  .group-item .group-name {
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 250px 20px;
+    align-items: center;
+    background-color: var(--background-color);
+    box-shadow: var(--box-shadow-2);
+    border-radius: 6px;
+  }
+
+
+
+  .members-list {
+    padding: 0 1rem;
+    border-left: 1px solid #ccc;
+  }
+
+  .members-list .member-item {
+    display: grid;
+    grid-template-columns: 40px 1fr 100px 40px 100px;
+    align-items: center;
+    gap: 20px;
+    margin: 1rem 0;
+  }
+
+  .members-list .member-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #333;
+  }
+
+  .dropdown {
+    position: absolute;
+    right: 1%;
+    top: 40px;
+    background-color: var(--background-color);
+    box-shadow: var(--box-shadow);
+    border-radius: 6px;
+    max-width: 150px;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .dropdown a {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    align-items: center;
+    gap: 6px;
+    margin: .3rem 0;
+    padding: .5rem;
+    color: #333;
+    width: 100%;
+    height: 40px;
+    font-weight: bold;
+  }
+
+  .dropdown a:hover {
+    background-color: #dddddd2d;
+  }
+
+  .dropdown a svg {
+    width: 20px;
+    height: 20px;
+  }
+</style>
+
+
+<main class="body-with-sidebar" x-data="GroupApp(<%= JSON.stringify(users) %>, <%= JSON.stringify(groups) %>)">
+  <menu class="sidebar">
+    <li><a href="/users">People</a></li>
+    <li><a href="/groups">Lawyer</a></li>
+    <li><a href="/groups">Paralegal</a></li>
+    <li><a href="/groups">Admin</a></li>
+    <li><a href="/groups">Security & access</a></li>
+  </menu>
+  <section class="group-container">
+    <div class="header">
+      <h2>Liste de groupes créés (<span x-text="groupsData.length"></span>)</h2>
+      <button class="button" type="button" @click="openModal()" type="button">&plus; Ajouter un nouveau groupe</button>
+    </div>
+    <ul class="group-list">
+      <template x-for="group in groupsData">
+        <li class="group-item" :id="`group_${group.id}`">
+          <div class="group-name">
+            <h4 x-text="group.name"></h4>
+            <div class="member-avatar-list">
+              <template x-for="member in group.members">
+                <img :src="'/avatars/' + member.avatarUrl" :alt="member.firstName" />
+              </template>
+            </div>
+            <button @click="toggleDropdown(group.id)" class="btn-transparent">⋮</button>
+            <div class="dropdown" x-show="activeDropdown === group.id" @click.outside="activeDropdown = null">
+              <a :href="`/groups/${group.id}/edit`">
+                <svg viewBox="0 0 24 24">
+                  <use href="/assets/icons.svg#edit" />
+                </svg>
+                <span>Modifier</span>
+              </a>
+              <a :hx-delete="`/groups/${group.id}`" :hx-target="`#group_${group.id}`" hx-swap="outerHTML" class="delete-group">
+                <svg viewBox="0 0 24 24">
+                  <use href="/assets/icons.svg#trash" />
+                </svg>
+                <span>Supprimer</span>
+              </a>
+            </div>
+          </div>
+          <details>
+            <summary>Membres</summary>
+            <div class="members-list">
+              <template x-for="member in group.members" :key="member.id">
+                <div class="member-item" :id="`member_${member.id}`">
+                  <img :src="'/avatars/' + member.avatarUrl" :alt="member.firstName" />
+                  <div class="user-info">
+                    <b x-text="member.firstName + ' ' + member.lastName"></b><br>
+                    <span x-text="member.email"></span>
+                  </div>
+                  <button class="role" :data-role="member.role" x-text="member.role"></button>
+                  <button class="role-group" x-text="member.role_group"></button>
+                  <button type="button" :hx-delete="`/groups/remove_member/${JSON.stringify({ groupId: group.id, userId: member.id })}?_method=DELETE`" :hx-target="`#member_${member.id}`" class="remove-member">Remove</button>
+                </div>
+              </template>
+            </div>
+          </details>
+        </li>
+      </template>
+    </ul>
+    </div>
+  </section>
+</main>
+
+<dialog class="modal group">
+  <div class="header">
+    <h2>Créer un nouveau groupe</h2>
+    <button hx-on:click="document.querySelector('.modal.group').close()" class="btn-transparent">&times;</button>
+  </div>
+
+  <div class="group_app" x-data="GroupApp(<%= JSON.stringify(users) %>, <%= JSON.stringify(groups) %>)">
+    <div class="group_contacts">
+      <h4>Liste du personnel</h4>
+      <%- include('../../components/search-field') %>
+      <ul class="persons-list">
+        <template x-for="person in filteredPersons" :key="person.id">
+          <li class="person-item" :class="{'selected': selectedPersons.includes(person)}">
+            <input type="checkbox" @click="togglePerson(person)" />
+            <img :src="'/avatars/' + person.avatarUrl" :alt="person.firstName">
+            <div class="user-info">
+              <b x-text="person.firstName + ' ' + person.lastName"></b><br>
+              <span x-text="person.email"></span>
+            </div>
+            <button class="role" x-text="person.role" :data-role="person.role"></button>
+          </li>
+        </template>
+      </ul>
+    </div>
+
+    <form class="form" action="/groups" method="post">
+      <div class="field">
+        <label for="name">Nom du groupe:</label>
+        <input type="text" id="name" x-model="name" required />
+        <input type="hidden" name="data" :value="JSON.stringify({ name, users: selectedPersons.map(u => ({ id: u.id, role: u.role })) })" />
+      </div>
+      <div class="field">
+        <label for="description">Description du groupe</label>
+        <textarea name="description" id="description"></textarea>
+      </div>
+      <button type="submit">Créer un nouveau groupe</button>
+      <div class="selected-person-container">
+        <h4>Membres selectionnés</h4>
+        <ul>
+          <template x-for="person in selectedPersons" :key="person.id">
+            <li class="person">
+              <span x-text="person.firstName"></span>
+              <span x-text="person.lastName"></span>
+              <span x-text="person.email"></span>
+              <select x-on:change="updateRole(person.id, $event.target.value)">
+                <% groupUserRoles.forEach(role=> { %>
+                <option value="<%= role %>" <%=role==='MEMBER' ? 'selected' : '' %>><%= role %>
+                </option>
+                <% }) %>
+              </select>
+            </li>
+          </template>
+        </ul>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<script>
+  function GroupApp(persons, groups) {
+    return {
+      name: '',
+      searchQuery: '',
+      personsData: persons,
+      selectedPersons: [],
+      activeDropdown: null,
+      groupsData: groups.data,
+
+      openModal() {
+        document.querySelector('.modal.group').showModal();
+      },
+      togglePerson(person) {
+        const index = this.selectedPersons.findIndex(p => p.id === person.id);
+        if (index === -1) {
+          this.selectedPersons.push({
+            ...person,
+            role: 'MEMBER'
+          });
+        } else {
+          this.selectedPersons.splice(index, 1);
+        }
+      },
+      toggleDropdown(groupId) {
+        this.activeDropdown = this.activeDropdown === groupId ? null : groupId;
+      },
+      get filteredPersons() {
+        return this.personsData.filter(p => {
+          const query = this.searchQuery.toLowerCase();
+          return p.firstName.toLowerCase().includes(query) ||
+            p.lastName.toLowerCase().includes(query) ||
+            p.email.toLowerCase().includes(query) ||
+            p.role.toLowerCase().includes(query);
+        });
+      },
+      updateRole(personId, role) {
+        let person = this.selectedPersons.find((p) =>
+          p.id === personId
+        )
+        if (person) {
+          person.role = role
+        }
+      },
+    };
+  }
+</script>

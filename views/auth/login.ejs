@@ -1,11 +1,11 @@
 <%- include('../partials/header') %>
-<%- include('../partials/flash') %>
 
 
 <div class="main">
   <h1>Connexion</h1>
 
-  <form class="form login" action="/" method="post" >
+  <form class="form login" action="/" method="post">
+    <%- include('../partials/flash') %>
     <div class="field">
       <label for="email">Entrez votre adresse email</label>
       <input type="email" name="email" id="email" placeholder="Email" required />

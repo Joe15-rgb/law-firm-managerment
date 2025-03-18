@@ -1,78 +1,92 @@
 <%- include('../../partials/header') %>
-<menu>
-  <li><a href="/groups">Team</a></li>
-  <li><a href="/groups">Lawyer</a></li>
-  <li><a href="/groups">Paralegal</a></li>
-  <li><a href="/groups">Admin</a></li>
-  <li><a href="/groups">Security & access</a></li>
-</menu>
-<div class="contenair_users_list" x-data="setup(<%= JSON.stringify(users)%>)">
-  <div class="header-section">
-    <h3 class="title">User Management <span class="counter" x-text="`(${users.length})`"></span></h6>
+<div class="body-with-sidebar">
+  <menu class="sidebar">
+    <li><a href="/groups">Team</a></li>
+    <li><a href="/groups">Lawyer</a></li>
+    <li><a href="/groups">Paralegal</a></li>
+    <li><a href="/groups">Admin</a></li>
+    <li><a href="/groups">Security & access</a></li>
+  </menu>
+  <div class="contenair_users_list" x-data="setup(<%= JSON.stringify(users)%>)">
+    <div class="header-section">
+      <h2 class="title">User Management <span class="counter" x-text="`(${users.length})`"></span></h2>
 
-    <div class="controls">
-      <%- include('../../components/search_bar.ejs') %>
-      <div class="filter-group">
-        <label for="sort" class="sr-only">Sort by</label>
-        <select id="sort" x-model="sortKey" class="select-input">
-          <option value="role">Role</option>
-          <option value="createdAt">Registration Date</option>
-        </select>
-        <button type="button" class="primary-btn" @click="openCreateForm">
+      <div class="controls">
+        <%- include('../../components/search-field') %>
+        <div class="filter-group">
+          <select id="sort" x-model="sortKey" class="select-input">
+            <option value="role">Role</option>
+            <option value="createdAt">Registration Date</option>
+          </select>
+        </div>
+        <button type="button" class="primary-btn" hx-on:click="openModalForm()" hx-get="/users/register" hx-target=".modal-content">
           + Add User
         </button>
       </div>
     </div>
-  </div>
-  <!-- Table users -->
+    <!-- Table users -->
 
-  <div class="responsive-table">
-    <table class="users-table">
-      <thead>
-        <tr>
-          <th class="user-info-header">Users</th>
-          <th>Role</th>
-          <th>Phone</th>
-          <th class="actions-header">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <template x-for="user in filteredUsers" :key="user.id">
-          <tr class="user-row">
-            <td class="user-info">
-              <div class="avatar-container">
-                <img :src="user.avatarUrl ? `/avatars/${user.avatarUrl}` : '/default-avatar.png'" alt="User avatar" class="avatar" @error="user.avatarUrl = null">
-              </div>
-              <div class="user-details">
-                <span class="user-name" x-text="`${user.firstName} ${user.lastName}`"></span>
-                <span class="user-email" x-text="user.email"></span>
-              </div>
-            </td>
-            <td>
-              <span class="role-badge" :class="`role-${user.role.toLowerCase()}`" x-text="user.role"></span>
-            </td>
-            <td x-text="formatPhoneNumber(user.phone)"></td>
-            <td class="actions-cell">
-              <div class="dropdown-container">
-                <button class="icon-btn" @click="toggleDropdown(user.id)" aria-label="User actions">⋮</button>
-                <%- include('../../components/dropdown.ejs') %>
-              </div>
-            </td>
+    <div class="responsive-table">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectedAllUser"></th>
+            <th class="user-info-header">Users</th>
+            <th>Role</th>
+            <th>Phone</th>
+            <th>Joint At</th>
+            <th class="actions-header">Actions</th>
           </tr>
-        </template>
+        </thead>
+        <tbody>
+          <template x-for="user in filteredUsers" :key="user.id">
+            <tr class="user-row">
+              <td>
+                <input type="checkbox" id="selectedUser">
+              </td>
+              <td class="user-info">
+                <div class="avatar-container">
+                  <img :src="user.avatarUrl ? `/avatars/${user.avatarUrl}` : '/default-avatar.png'" alt="User avatar" class="avatar" @error="user.avatarUrl = null">
+                </div>
+                <div class="user-details">
+                  <span class="user-name" x-text="`${user.firstName} ${user.lastName}`"></span>
+                  <span class="user-email" x-text="user.email"></span>
+                </div>
+              </td>
+              <td>
+                <span class="role-badge" :class="`role-${user.role.toLowerCase()}`" x-text="user.role"></span>
+              </td>
+              <td x-text="formatPhoneNumber(user.phone)"></td>
+              <td><span x-text="user.joinedAt"></span></td>
+              <td class="actions-cell">
+                <div class="dropdown-container">
+                  <button class="icon-btn" @click="toggleDropdown(user.id)" aria-label="User actions">⋮</button>
+                  <%- include('../../components/dropdown.ejs') %>
+                </div>
+              </td>
+            </tr>
+          </template>
 
-      </tbody>
-      <tfoot></tfoot>
-    </table>
-  </div>
-  <!-- Table empty -->
-  <template x-if="!users.length">
-    <div class="empty-state">
-      <p>No users found matching your criteria</p>
+        </tbody>
+        <tfoot></tfoot>
+      </table>
     </div>
-  </template>
+    <!-- Table empty -->
+    <template x-if="!users.length">
+      <div class="empty-state">
+        <p>No users found matching your criteria</p>
+      </div>
+    </template>
+  </div>
+
 </div>
+<dialog class="modal">
+  <div class="modal-content"></div>
+</dialog>
 <script>
+  const openModalForm = () => document.querySelector('.modal').showModal()
+  const closeModalForm = () => document.querySelector('.modal').close()
+
   function setup(props) {
     return {
       searchQuery: '',

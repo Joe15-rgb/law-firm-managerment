@@ -1,12 +1,14 @@
-<header>
+<div class="header">
   <h2>Ajouter un Utilisateur</h2>
-</header>
+  <button hx-on:click='closeModalForm()' class="btn-transparent" type="button">&times;</button>
+</div>
 
 
 <form class="form" action="/users/register" method="post">
-
+  <%- include('../../partials/flash.ejs') %>
   <% UserFields.forEach(field => { %>
-   <%- include('../../components/input.ejs', field) %>
+  <%- include('../../components/input.ejs', field) %>
   <% }) %>
+  <br>
   <button type="submit">Sauvegarder</button>
 </form>

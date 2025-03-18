@@ -8,7 +8,7 @@
     "commandor:list": "bun run ./command/commandor.ts",
     "commandor:seed": "bun run ./prisma/seeds/index.ts",
     "start": "node ./app.js",
-    "dev": "bun run --watch ./app.ts",
+    "dev": "bun run --watch ./app.ts && open http://localhost:8080",
     "build": "tsc .",
     "test": "bun test"
   },
@@ -37,6 +37,7 @@
     "@types/passport": "^1.0.17",
     "@types/passport-local": "^1.0.38",
     "@types/supertest": "^6.0.2",
+    "@types/uuid": "^10.0.0",
     "chalk": "^5.4.1",
     "commander": "^13.0.0",
     "inquirer": "^12.3.2",
@@ -81,6 +82,7 @@
     "rotating-file-stream": "^3.2.5",
     "sharp": "^0.33.5",
     "twilio": "^5.4.2",
+    "uuid": "^11.1.0",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
   }

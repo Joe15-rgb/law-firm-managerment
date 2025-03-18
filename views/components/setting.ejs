@@ -1,9 +1,9 @@
-<div class="setting">
-  <div class="icon">
-    <img src="/assets/profile.svg" alt="user-icon" />
+<div class="setting" x-show="open" @click.outside="open=false">
+  <div class="icon-wrapper">
+    <img class="icon" src="/assets/profile.svg" alt="user-icon" width="80" height="80" />
   </div>
   <div class="info">
-    <h3><%= user.firstName %></h3>
+    <h3><%= user.lastName + ' ' + user.firstName %></h3>
     <p><%= user.role %></p>
   </div>
   <div class="actions">

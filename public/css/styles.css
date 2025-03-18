@@ -93,6 +93,25 @@ button {
    border: none;
 }
 
+button[type='button'] {
+   cursor: pointer;
+   zoom: normal;
+   padding: 0.5rem 1rem;
+}
+
+.button {
+   text-align: center;
+   padding: 0.8rem 1rem;
+   box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+      rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+   border-radius: 6px;
+   -webkit-border-radius: 6px;
+   -moz-border-radius: 6px;
+   -ms-border-radius: 6px;
+   -o-border-radius: 6px;
+   width: 100%;
+}
+
 svg {
    width: 20px;
    height: 20px;
@@ -108,6 +127,7 @@ svg {
    padding: 1rem;
    height: 80px;
    margin-bottom: 1rem;
+   position: relative;
 }
 
 .header .logo {
@@ -171,10 +191,47 @@ svg {
 .content.active {
    display: block;
 }
-
+.teams-container,
 .ledgerContent {
    width: 80%;
    margin: 0 auto;
+}
+
+.teams-container .group-item {
+   padding: 1rem;
+   margin: 0.8rem 0;
+   display: grid;
+   grid-template-columns: 1fr 250px 20px;
+   align-items: center;
+   background-color: var(--background-color);
+   box-shadow: var(--box-shadow-2);
+   border-radius: 3px;
+   -webkit-border-radius: 3px;
+   -moz-border-radius: 3px;
+   -ms-border-radius: 3px;
+   -o-border-radius: 3px;
+}
+
+.group-list {
+   padding: 0.5rem;
+}
+
+.group-item {
+   width: 100%;
+   margin-bottom: 0.5rem;
+   position: relative;
+}
+.member-avatar-list {
+   display: flex;
+   gap: 10px;
+}
+.member-avatar-list img {
+   width: 30px;
+   height: 30px;
+   background-color: #333;
+   border-radius: 50%;
+   margin: -10px;
+   border: 2px solid var(--background-color);
 }
 
 .content,
@@ -267,7 +324,7 @@ svg {
 }
 
 .modal {
-   margin: 10% auto;
+   margin: 2% auto;
    border: none;
    box-shadow: var(--box-shadow-2);
    background-color: var(--background-color);
@@ -316,8 +373,8 @@ svg {
 }
 
 .form .field input,
-select,
-textarea,
+.field select,
+.field textarea,
 button[type='submit'] {
    width: 100%;
    max-height: 40px;
@@ -388,7 +445,7 @@ button[type='submit'] {
    align-items: center;
    gap: 8px;
    padding: 0.2rem;
-   width: 150px;
+   width: 180px;
 }
 
 .badge .profile .info .role {
@@ -403,7 +460,6 @@ button[type='submit'] {
    border-radius: 10px;
    object-fit: cover;
 }
-
 .calendar-appointment {
    width: 80%;
    margin: 0.5rem auto;
@@ -482,7 +538,7 @@ button[type='submit'] {
    display: grid;
    width: 100%;
    padding: 1.5rem;
-   max-width: 700px;
+   max-width: 750px;
    grid-template-columns: repeat(auto-fill, minmax(var(--proportion), 1fr));
    grid-template-rows: repeat(
       auto-fit,
@@ -503,7 +559,11 @@ button[type='submit'] {
       text-align: center;
       cursor: pointer;
       transition: transform 0.2s ease-in-out;
-
+      border-radius: 6px;
+      -webkit-border-radius: 6px;
+      -moz-border-radius: 6px;
+      -ms-border-radius: 6px;
+      -o-border-radius: 6px;
       &:hover {
          transform: translateY(-5px);
 
@@ -518,6 +578,72 @@ button[type='submit'] {
          width: var(--dimension);
          height: var(--dimension);
          stroke-width: 0.62;
+      }
+      .content {
+         color: var(--primary-hover);
+         display: flex;
+         justify-content: center;
+         flex-direction: column;
+         padding: 0rem;
+      }
+   }
+}
+.setting {
+   position: absolute;
+   display: flex;
+   padding: 1rem 0;
+   margin-top: 0.5rem;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+   width: 100%;
+   max-width: 250px;
+   background-color: var(--white-base);
+   border: 1px solid var(--border-color);
+   top: 60px;
+   right: 1%;
+   z-index: 9;
+   border-radius: 6px;
+   -webkit-border-radius: 6px;
+   -moz-border-radius: 6px;
+   -ms-border-radius: 6px;
+   -o-border-radius: 6px;
+
+   .icon-wrapper {
+      background: var(--border-color);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      -webkit-border-radius: 50%;
+      -moz-border-radius: 50%;
+      -ms-border-radius: 50%;
+      -o-border-radius: 50%;
+      .icon {
+         --dim: 100px;
+         max-width: var(--dim);
+         max-height: var(--dim);
+         padding: 0.5rem;
+      }
+   }
+
+   .info {
+      text-align: center;
+   }
+
+   .actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 40px);
+      gap: 10px;
+      padding: 1rem;
+
+      form {
+         grid-column: span 2;
+      }
+
+      button[type='submit'] {
+         background-color: #7d0b0bd2;
+         color: var(--surface-color);
       }
    }
 }
@@ -563,7 +689,7 @@ button[type='submit'] {
    gap: 15px;
    align-items: center;
 }
-
+.body-with-sidebar,
 .main-ledgers {
    display: grid;
    grid-template-columns: 20% 1fr;
@@ -587,6 +713,7 @@ button[type='submit'] {
       }
    }
 }
+
 .modal.ledger {
    max-width: 80%;
    height: 85%;
@@ -625,8 +752,8 @@ button[type='submit'] {
          display: flex;
          align-items: center;
          gap: 15px;
-         padding: .5rem;
-         margin-top: .6rem;
+         padding: 0.5rem;
+         margin-top: 0.6rem;
          border: 1px solid var(--border-color);
 
          .inital {
@@ -645,6 +772,132 @@ button[type='submit'] {
             -ms-border-radius: 50%;
             -o-border-radius: 50%;
          }
+      }
+   }
+}
+.message {
+   width: 100%;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 1rem 0.3rem;
+   font-size: 15px;
+
+   &.error {
+      border-left: 2px solid #d32f2f;
+      background-color: #d32f2f2f;
+   }
+   &.warn {
+      border-left: 2px solid #d39c2f;
+      background-color: #d3a72f2f;
+   }
+   &.info {
+      border-left: 2px solid #2f91d3;
+      background-color: #2f7bd32f;
+   }
+   &.success {
+      border-left: 2px solid #2fd337;
+      background-color: #2fd33d2f;
+   }
+}
+.responsive-table {
+   width: 100%;
+   padding: 1rem;
+   background-color: var(--surface-color);
+
+   .users-table {
+      border-collapse: collapse;
+      width: 100%;
+
+      thead tr th {
+         background-color: #ebe8e8b4;
+         padding: 1rem;
+
+         &:nth-child(2) {
+            text-align: left;
+         }
+      }
+      .user-row {
+         border-bottom: 1px solid #e0dfdf67;
+
+         .role-badge {
+            padding: 0.2rem 0.8rem;
+            font-size: 11px;
+            border-radius: 30px;
+            -webkit-border-radius: 30px;
+            -moz-border-radius: 30px;
+            -ms-border-radius: 30px;
+            -o-border-radius: 30px;
+            &.role-admin {
+               background-color: #d32f2f22;
+               border: 1px solid #d32f2f;
+            }
+            &.role-lawyer {
+               background-color: #2f8cd33a;
+               border: 1px solid #113d70f6;
+            }
+            &.role-paralegal {
+               background-color: #d3ad2f40;
+               border: 1px solid #d3ad2fed;
+            }
+         }
+
+         td {
+            text-align: center;
+            padding: 0.4rem;
+         }
+
+         .user-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            .avatar-container {
+               width: 40px;
+               height: 40px;
+               background-color: #333;
+               overflow: hidden;
+               aspect-ratio: 1;
+               border-radius: 50%;
+               -webkit-border-radius: 50%;
+               -moz-border-radius: 50%;
+               -ms-border-radius: 50%;
+               -o-border-radius: 50%;
+               img {
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+               }
+            }
+            .user-details {
+               span {
+                  display: block;
+                  text-align: left;
+
+                  &:nth-child(1) {
+                     font-weight: bold;
+                  }
+               }
+            }
+         }
+      }
+   }
+}
+.header-section {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 0 1rem;
+
+   .controls {
+      display: grid;
+      width: 100%;
+      max-width: 500px;
+      grid-template-columns: 5fr 2fr 3fr;
+      gap: 15px;
+
+      select {
+         height: 100%;
+         padding: 0.5rem;
       }
    }
 }

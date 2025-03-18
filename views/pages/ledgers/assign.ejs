@@ -10,9 +10,9 @@
 <h1>Assigns</h1>
 
 <form action="/treatments/assign" method="post" x-data="setup()">
-   <input type="text" name="actor" id="actor" />
-   <input type="text" name="legalCaseId" id="legalCaseId" />
-   <input type="text" name="actorType" id="actorType" />
+   <input type="hidden" name="actor" id="actor" />
+   <input type="hidden" name="legalCaseId" id="legalCaseId" />
+   <input type="hidden" name="actorType" id="actorType" />
    <details class="group-item">
       <summary>Dossiers client non assignes</summary>
       <ul>
@@ -75,13 +75,13 @@
 <ul>
    <h4>Team assigned</h4>
    <% result.data.teams.forEach(assignTeam => { %>
-   <li><%= assignTeam.id %></li>
+   <li><%= assignTeam.name %></li>
    <% }) %>
 </ul>
 <ul>
    <h4>User assigned</h4>
    <% result.data.users.forEach(assignUser => { %>
-   <li><%= assignUser.id %></li>
+   <li><%= assignUser.firstName %></li>
    <% }) %>
 </ul>
 

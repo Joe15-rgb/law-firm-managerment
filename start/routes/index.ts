@@ -1,18 +1,20 @@
-import { Router } from "express";
-import AuthController from "@app/controllers/auth_controllers";
+import { Router } from 'express';
+import AuthController from '@app/controllers/auth_controllers';
+import { guest, auth } from '@app/middlewares';
 
-const router = Router()
+const router = Router();
 
-router.route('/')
-.get(AuthController.renderLoginPage)
-.post(AuthController.login)
+router
+   .route('/')
+   .get(guest, AuthController.renderLoginPage)
+   .post(AuthController.login);
 
-router.route('/logout')
-.delete(AuthController.logout)
+router.route('/logout').all(auth).delete(AuthController.logout);
 
-router.route('/forgot')
-.get(AuthController.renderPageforgotPassword)
-.post(AuthController.forgotPassword)
+router
+   .route('/forgot')
+   .all(guest)
+   .get(AuthController.renderPageforgotPassword)
+   .post(AuthController.forgotPassword);
 
-
-export default router
+export default router;

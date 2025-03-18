@@ -50,7 +50,7 @@ class TreatmentController {
          },
       };
 
-      res.status(200).render('pages/ledgers/assign', {result});
+      // res.status(200).render('pages/ledgers/assign', {result});
       res.send(result);
    });
 

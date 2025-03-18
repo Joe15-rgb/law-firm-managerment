@@ -14,7 +14,7 @@ interface AppointmentInput extends BaseField{
    name: FieldName<Omit<Appointment, 'id'>>}
 
 interface UserInput extends BaseField{
-  name: FieldName<User> | 'confirm_password'
+  name: FieldName<User> | 'confirm_password' | 'password'
 }
 
 export enum Country {
@@ -174,28 +174,28 @@ export const inputUsers: Array<UserInput> = [
       name: 'firstName',
       value: '',
       label: 'Entrez votre firstName',
-      placeholder: 'firstName',
+      placeholder: 'FirstName',
    },
    {
       type: 'text',
       name: 'lastName',
       value: '',
       label: 'Entrez votre lastName',
-      placeholder: 'lastName',
+      placeholder: 'LastName',
    },
    {
       type: 'email',
       name: 'email',
       value: '',
       label: 'Entrez votre email',
-      placeholder: 'email',
+      placeholder: 'Email',
    },
    {
       type: 'tel',
       name: 'phone',
       value: '',
       label: 'Entrez votre phone',
-      placeholder: 'phone',
+      placeholder: 'Phone',
    },
    {
       type: 'select',
@@ -213,17 +213,17 @@ export const inputUsers: Array<UserInput> = [
    },
    {
     type: 'password',
-    name: 'passwordHash',
+    name: 'password',
     label: 'Entrez votre password',
     value:'',
-    placeholder: 'passwordHash'
+    placeholder: 'Password'
    },
     {
     type: 'password',
     name: 'confirm_password',
     label: 'Confirmez votre password',
     value:'',
-    placeholder: 'passwordHash'
+    placeholder: 'Confirm password'
    }
 ];
 

@@ -28,7 +28,7 @@ class LawyerPrismaService {
             where: {
                userId: id,
             },
-         })
+         }),
       ]);
       return {
          data: ledgers,
@@ -43,12 +43,17 @@ class LawyerPrismaService {
          include: {
             group: {
                include: {
-                  members: true,
+                  members: {
+                     include:{
+                        user: true
+                     }
+                  }
+
                },
             },
          },
       });
-      return groups;
+      return groups.map((gs) => (gs.group))
    }
    async getGroupAssignedLedgersByCurrentLawyer(id: string) {
       const ledgersGroup = await this.prisma.treatment.findMany({

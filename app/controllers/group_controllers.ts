@@ -34,7 +34,7 @@ class GroupControllers {
 
          const groups = await service.getAllGroups(page, limit);
 
-         res.status(200).send(groups);
+         res.status(200).render('pages/user/group', {groups});
       } catch (error) {
          console.error(error);
          res.status(500).json({ error: 'Internal server error' });
@@ -117,8 +117,13 @@ class GroupControllers {
 
    static async removeMember(req: Request, res: Response) {
       const {userId, groupId} = JSON.parse(req.params.ids)
+      if (!userId && !groupId) {
+         req.flash('error', 'mauvais identifiant')
+         return res.status(400).redirect('/groups')
+      }
+      await service.removeMemberInGroup(userId, groupId)
 
-      res.json(await service.removeMemberInGroup(userId, groupId))
+      res.status(200).send('')
    }
 }
 
