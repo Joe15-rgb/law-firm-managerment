@@ -1,10 +1,10 @@
 <div class="dropdown" x-show="activeDropdown === ledger.id" @click.outside="activeDropdown = null">
   <ul>
+    <li @click="location.href = `/lawyers/ledger/${ledger.legalCase.id}`">voir dossier</li>
     <li @click="openModal()">Fixe un rendez-vous</li>
-    <li>Ajouter les elements au dossier</li>
+    <li @click="addDocument(ledger.legalCase.id)">Ajouter les elements au dossier</li>
     <li>Demande de revision</li>
     <li>Completer le dossier</li>
-    <li>Détail le dossier</li>
     <li>Archiver le dossier</li>
   </ul>
 </div>

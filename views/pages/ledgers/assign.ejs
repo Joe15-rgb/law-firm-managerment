@@ -1,107 +1,258 @@
-<script src="/js/alpine.min.js" defer></script>
+<%- include('../../partials/header.ejs') %>
+
 <style>
-   .group-item {
-      border: 1px solid #ccc;
-      padding: 1rem;
-      width: 30%;
-   }
+  .group-item {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    width: 30%;
+  }
+
+  .ledger_not_assigned {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    padding-top: 2rem;
+  }
+
+  .ledger_not_assigned-item {
+    height: 260px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    background-color: var(--surface-color);
+    display: grid;
+    gap: 15px;
+    grid-template-rows: 60px 1fr 40px;
+  }
+
+  .thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+
+  .group .head-group,
+  .user {
+    width: 100%;
+    display: grid;
+    padding: .5rem .3rem;
+    grid-template-columns: 15px 40px 1fr 40px;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+
+  .group .head-group:nth-child(odd),
+  .user:nth-child(odd) {
+    background-color: #eeeeee50;
+  }
+
+  .ledger_not_assigned-item .avatar,
+  .member .thumbnail,
+  .head-group .thumbnail,
+  .user .thumbnail {
+    background-color: #333;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    padding: .2rem;
+  }
+
+  .btn-selected {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    cursor: pointer;
+  }
+
+  .member {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    padding: .5rem 4rem;
+    gap: 15px;
+  }
+
+  .modal._action_1n6lm_13 {
+    max-width: 500px;
+  }
+
+  .groups_and_users {
+    padding: 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 400px;
+    margin: .5rem 0;
+  }
+
+  .ledger_not_assigned-item .action,
+  .content-modal .action {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
+    margin: .5rem 0;
+  }
+
+  .modal.confirm {
+    max-width: 240px;
+    max-height: 220px;
+  }
+
+  .main-assign {
+    padding: 1rem;
+  }
+
+  .client {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
 </style>
 
-<h1>Assigns</h1>
+<div class="body-with-sidebar">
+  <menu class="sidebar">
+    <li><a href="/ledgers">All Legal Case</a></li>
+    <li><a href="">Unassigned</a></li>
+    <li><a href="">Need Review</a></li>
+    <li><a href="/treatments">Assigned</a></li>
+    <li><a href="">Completed</a></li>
+    <li><a href="/clients">Clients</a></li>
+  </menu>
+  <main class="main-assign">
+    <%- include('../../partials/flash.ejs') %>
+    <h2>Dossier non assigne</h2>
+    <br>
+    <div class="assigne_app" x-data="assignedApp(<%= JSON.stringify(result.ledgersNotAssigned) %>)">
+      <%- include('../../components/search-field.ejs') %>
+      <div class="ledger_not_assigned">
+        <template x-for="ledger in ledgersFilter" :key="ledger.id">
+          <div class="ledger_not_assigned-item">
+            <div class="client">
+              <img width="50" height="50" src="/assets/profile.svg" alt="" class="avatar">
+              <div class="client_info">
+                <b x-text="ledger.client.firstName + ' ' + ledger.client.lastName "></b><br>
+                <span x-text="ledger.client.email"></span>
+              </div>
+            </div>
+            <h2 x-text="ledger.title"></h2>
+            <div class="action">
+              <button class="button" @click="getLegalCaseId(ledger.id)" type="button">Assign to</button>
+              <button class="button" type="button">Delete</button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <dialog class="modal _action_1n6lm_13">
+      <div class="modal-header">
+        <h2>Assign to</h2>
+        <button hx-on:click="document.querySelector('.modal._action_1n6lm_13').close()" class="btn-transparent">&times;</button>
+      </div>
+      <div class="content-modal" x-data="assignUserOrGroup(<%= JSON.stringify(groups) %>, <%= JSON.stringify(users) %>)">
+        <%- include('../../components/search-field.ejs') %>
+        <div class="groups_and_users">
+          <div class="users-container">
+            <h3>Conctats</h3>
+            <template x-for="user in userFilter">
+              <div class="user">
+                <input type="checkbox">
+                <img :src="`/avatars/${user.avatarUrl}`" alt="" class="thumbnail">
+                <div class="user-info">
+                  <b x-text="`${user.firstName } ${user.lastName}`"></b><br>
+                  <span x-text="user.role"></span>
+                </div>
+                <button @click="getUserId(user.id, user.firstName)" class="btn-selected">+</button>
+              </div>
+            </template>
+          </div>
+          <div class="group-container">
+            <h3>Team</h3>
+            <template x-for="group in groupFilter">
+              <div class="group">
+                <div class="head-group">
+                  <input type="checkbox" @click="getGroupId(group.id, group.name)">
+                  <img class="thumbnail" src="/assets/team.svg" alt="">
+                  <h4 x-text="group.name"></h4>
+                  <button @click="open =!open" class="btn-selected">⌄</button>
+                </div>
+                <div class="members-text" x-show="open">
+                  <template x-for="member in group.members" :key="member.id">
+                    <div class="member">
+                      <img :src="`/avatars/${member.avatarUrl}`" class="thumbnail">
+                      <div class="user-info">
+                        <b x-text="`${member.firstName}  ${member.lastName}`"></b><br>
+                        <span x-text="member.role"></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div class="action">
+          <button class="button" type="button" @click="document.querySelector('.modal.confirm').showModal()">Assigne</button>
+          <button class="button" type="button" @click="document.querySelector('.modal._action_1n6lm_13').close()">Cancel</button>
+        </div>
+      </div>
+    </dialog>
 
-<form action="/treatments/assign" method="post" x-data="setup()">
-   <input type="hidden" name="actor" id="actor" />
-   <input type="hidden" name="legalCaseId" id="legalCaseId" />
-   <input type="hidden" name="actorType" id="actorType" />
-   <details class="group-item">
-      <summary>Dossiers client non assignes</summary>
-      <ul>
-         <% legalCases.data.forEach(legalCase => { %>
-         <li @click="getLegalCaseId('<%= legalCase.id %>')">
-            <span><%= legalCase.title %></span><br />
-            <span><%= legalCase.client.firstName %></span>
-         </li>
-         <% }) %>
-      </ul>
-   </details>
-   <details class="group-item">
-      <summary>Groupe</summary>
-      <ul>
-         <% teams.data.forEach(team => { %>
-         <li @click="getGroupId('<%= team.id%>')">
-            <span><%= team.name %></span>
-            <details>
-               <summary>Membres</summary>
-               <% team.members.forEach(member => { %>
-               <li>
-                  <img
-                     src="/avatars/<%= member.avatarUrl %>"
-                     alt=""
-                     width="20"
-                     height="20"
-                  />
-                  <span><%= member.firstName %></span>
-                  <span><%= member.lastName %></span>
-                  <button><%= member.role %></button>
-               </li>
-               <% }) %>
-            </details>
-         </li>
-         <% }) %>
-      </ul>
-   </details>
-   <details class="group-item">
-      <summary>Personnes</summary>
-      <ul>
-         <% users.forEach(user => { %>
-         <li @click="getUserId('<%= user.id%>')">
-            <img
-               src="/avatars/<%= user.avatarUrl %>"
-               alt=""
-               width="20"
-               height="20"
-            />
+    <dialog class="modal confirm">
+      <div class="content-modal">
+        <form action="/treatments/assign" method="post">
+          <input type="text" name="actor" id="actor" required>
+          <input type="text" name="actorType" id="actorType" required>
+          <input type="text" name="legalCaseId" id="legalCaseId" required>
+          <h4>Are you sure to assigned this legal case?</h4>
+          <div class="action">
+            <button class="button" type="submit">Valide</button>
+            <button class="button" type="reset" hx-on:click="document.querySelector('.modal.confirm').close()">cancel</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
 
-            <span><%= user.firstName %></span>
-            <span><%= user.lastName %></span>
-            <button><%= user.role %></button>
-         </li>
-         <% }) %>
-      </ul>
-   </details>
-   <button type="submit">Assign</button>
-</form>
 
-<ul>
-   <h4>Team assigned</h4>
-   <% result.data.teams.forEach(assignTeam => { %>
-   <li><%= assignTeam.name %></li>
-   <% }) %>
-</ul>
-<ul>
-   <h4>User assigned</h4>
-   <% result.data.users.forEach(assignUser => { %>
-   <li><%= assignUser.firstName %></li>
-   <% }) %>
-</ul>
-
+  </main>
+</div>
 
 <script>
-   function setup() {
-      return {
-         getLegalCaseId(id) {
-            document.getElementById('legalCaseId').value = id;
-         },
-         getUserId(id) {
-            document.getElementById('actor').name = 'userId';
-            document.getElementById('actor').value = id;
-            document.getElementById('actorType').value = 'USER';
-         },
-         getGroupId(id) {
-            document.getElementById('actor').name = 'groupId';
-            document.getElementById('actor').value = id;
-            document.getElementById('actorType').value = 'GROUP';
-         },
-      };
-   }
+  const assignUserOrGroup = (groupdata, userdata) => {
+    return {
+      searchQuery: '',
+      users: userdata,
+      groups: groupdata,
+      open: false,
+      userFilter() {
+        return this.users.filter(user => user.firstName.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase()))
+      },
+      groupFilter() {
+        return this.groups.filter(group => group.name.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase()))
+      },
+      getUserId(id, name) {
+        document.getElementById('actor').name = 'userId';
+        document.getElementById('actor').value = id;
+        document.getElementById('actorType').value = 'USER';
+        this.searchQuery = name
+      },
+      getGroupId(id) {
+        document.getElementById('actor').name = 'groupId';
+        document.getElementById('actor').value = id;
+        document.getElementById('actorType').value = 'GROUP';
+      },
+    }
+  }
+  const assignedApp = (data) => {
+    return {
+      searchQuery: '',
+      ledgers: data,
+      ledgersFilter() {
+        return this.ledgers.filter(ledger => ledger.title.toLocaleLowerCase().includes(this.searchQuery.toLocaleLowerCase()))
+      },
+      getLegalCaseId(id) {
+        document.getElementById('legalCaseId').value = id;
+        console.log(document.getElementById('legalCaseId'));
+        document.querySelector('.modal._action_1n6lm_13').showModal()
+      },
+    }
+  }
 </script>

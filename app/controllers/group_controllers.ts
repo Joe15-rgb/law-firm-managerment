@@ -73,7 +73,8 @@ class GroupControllers {
 
          const result = await service.createGroup({ name, users });
 
-         res.status(201).json(result);
+         req.flash('success', `Group <b>${result.name}</b> créé avec succès!`)
+         res.status(201).redirect('/groups');
       } catch (error) {
          res.status(500).json({ error: 'Failed to create group' });
       }

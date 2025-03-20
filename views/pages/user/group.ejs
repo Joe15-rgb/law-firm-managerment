@@ -141,6 +141,22 @@
     width: 20px;
     height: 20px;
   }
+
+  .header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .header-section .controls{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 380px;
+  }
+  ._container_1pcqt_1{
+    padding: 1rem;
+    max-width: 500px;
+  }
 </style>
 
 
@@ -153,9 +169,18 @@
     <li><a href="/groups">Security & access</a></li>
   </menu>
   <section class="group-container">
-    <div class="header">
+  <%- include('../../partials/flash.ejs') %>
+    <div class="header-section">
       <h2>Liste de groupes créés (<span x-text="groupsData.length"></span>)</h2>
-      <button class="button" type="button" @click="openModal()" type="button">&plus; Ajouter un nouveau groupe</button>
+      <div class="controls">
+      <%- include('../../components/search-field.ejs') %>
+        <button class="button" type="button" @click="openModal()" type="button">&plus; Ajouter un nouveau groupe</button>
+      </div>
+    </div>
+    <div class="_container_1pcqt_1">
+      <h4>Organise vos group ici</h4>
+      <p>Optimiser la collaboration et l'orginasation interne grâce à la creation de groupes d'avocats. Concrètement, cette fonctionnalité offre plusieurs avantages.
+      </p>
     </div>
     <ul class="group-list">
       <template x-for="group in groupsData">

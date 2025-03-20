@@ -14,6 +14,7 @@ import { sessionOptions } from '@configs/session_config';
 import passport from 'passport';
 import flash from 'express-flash';
 import methodOverride from 'method-override'
+import path from 'path';
 
 class Server {
 
@@ -89,7 +90,7 @@ class Server {
   }
   private initializeRoutes(routes?: (app: Express) => void): void {
     // Configuration des routes
-    this.app.get('/favicon.ico', (req: Request, res: Response): any => res.status(204).end());
+    this.app.get('/favicon.ico', (req: Request, res: Response): any => res.sendFile(path.join(__dirname, 'public', 'favicon.ico')));
 
     if (routes) {
       routes(this.app);

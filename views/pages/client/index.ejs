@@ -1,31 +1,144 @@
 <%- include('../../partials/header.ejs') %>
 
-<header>
-  <h1>Clients</h1>
-  <button type="button">+ Add client</button>
-</header>
-<menu>
-  <li><a href="">Individual</a></li>
-  <li><a href="">Company</a></li>
-</menu>
+<style>
+  .modal.client {
+    max-width: 750px;
+  }
 
-<div class="clients" x-data="ClientManager(<%= JSON.stringify(clients) %>)">
-  <div class="header-client">
-    <h4>All clients <span class="count" x-text="clients.length"></span></h4>
-    <div class="control">
-        <input type="search" x-model="searchQuery">
+  .header-client {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  section {
+    padding: 0rem 0.5rem;
+  }
+
+  .header-client .controls {
+    display: flex;
+    gap: 15px;
+  }
+
+  .role-badge {
+    padding: .5rem 1rem;
+  }
+
+  .role-company {
+    background-color: #13947e54;
+  }
+
+  .role-individual {
+    background-color: #94651354;
+  }
+
+  .user-row {
+    position: relative;
+  }
+
+  .dropdown-menu {
+    box-shadow: var(--box-shadow);
+    background-color: var(--surface-color);
+    border-radius: 3px;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    z-index: 1;
+  }
+
+  .dropdown-menu li {
+    padding: .5rem 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .dropdown-menu li:hover {
+    background-color: #eeedee;
+  }
+
+  .dropdown-menu li:last-child {
+    color: #6e090c;
+  }
+  .avatar{
+    padding: .5rem;
+  }
+</style>
+
+<main class="body-with-sidebar">
+  <menu class="sidebar">
+    <li><a href="">Individual</a></li>
+    <li><a href="">Company</a></li>
+  </menu>
+  <section x-data="ClientManager(<%= JSON.stringify(clients) %>)">
+    <%- include('../../partials/flash.ejs') %>
+    <div class="header-client">
+      <h2>All clients (<span class="count" x-text="clients.length"></span>)</h2>
+      <div class="controls">
+        <%- include('../../components/search-field.ejs') %>
+        <button @click="document.querySelector('.modal.client').showModal()" class="button" type="button">+ Add client</button>
+      </div>
     </div>
+    <div class="responsive-table">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectedAllUser"></th>
+            <th class="user-info-header">Users</th>
+            <th>Sex</th>
+            <th>Type</th>
+            <th>Phone</th>
+            <th>Country</th>
+            <th>City</th>
+            <th class="actions-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="client in filteredClients" :key="client.id">
+            <tr class="user-row">
+              <td>
+                <input type="checkbox" id="selectedUser">
+              </td>
+              <td class="user-info">
+                <div class="avatar-container">
+                  <img src="/assets/profile.svg" alt="User avatar" class="avatar" @error="user.avatarUrl = null">
+                </div>
+                <div class="user-details">
+                  <span class="user-name" x-text="`${client.firstName} ${client.lastName}`"></span>
+                  <span class="user-email" x-text="client.email"></span>
+                </div>
+              </td>
+              <td x-text="client.sex"></td>
+              <td>
+                <span class="role-badge" :class="`role-${client.clientType.toLowerCase()}`" x-text="client.clientType"></span>
+              </td>
+              <td x-text="formatPhoneNumber(client.phone)"></td>
+              <td x-text="client.country"></td>
+              <td x-text="client.city"></td>
+              <td class="actions-cell">
+                <div class="dropdown-container">
+                  <button class="btn-transparent icon-btn" @click="toggleDropdown(client.id)" aria-label="User actions">⋮</button>
+                  <menu x-show="activeDropdown === client.id" @click.outside="activeDropdown = null" class="dropdown-menu">
+                    <li class="dropdown-item">Voir detail</li>
+                    <li class="dropdown-item">Modifier</li>
+                    <li class="dropdown-item">Supprimer</li>
+                  </menu>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+  </section>
+</main>
+<dialog class="modal client">
+  <div class="modal-header">
+    <h1>Enregistre un nouveau client</h1>
+    <button hx-on:click="document.querySelector('.modal.client').close()" class="btn-transparent">&times;</button>
   </div>
-  <ul>
-    <template x-for="client in filteredClients">
-      <li x-text="client.firstName"></li>
-    </template>
-  </ul>
-
-</div>
-
-<dialog>
-  <form action="/clients/register" method="post">
+  <form class="form" action="/clients/register" method="post">
     <% inputClients.forEach(input => { %>
     <%- include('../../components/input.ejs', input) %>
     <% }) %>
@@ -38,11 +151,19 @@
     return {
       clients: props.data,
       searchQuery: '',
+      activeDropdown: null,
+
       filteredClients() {
         return this.clients.filter((client) =>
           client.firstName.toLocaleLowerCase()
           .includes(this.searchQuery.toLocaleLowerCase()))
-      }
+      },
+      toggleDropdown(clientId) {
+        this.activeDropdown = this.activeDropdown === clientId ? null : clientId;
+      },
+      formatPhoneNumber(phone) {
+        return phone?.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3') || 'N/A';
+      },
     }
   }
 </script>

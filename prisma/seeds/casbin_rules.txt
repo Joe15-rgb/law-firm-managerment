@@ -22,10 +22,6 @@ ADMIN	/treatments	GET
 ADMIN	/treatments	POST
 ADMIN	/treatments	PUT
 ADMIN	/treatments	DELETE
-LAWYER	/lawyers	GET
-LAWYER	/lawyers	POST
-LAWYER	/lawyers	PUT
-LAWYER	/lawyers	DELETE
 ADMIN	/documents	GET
 ADMIN	/documents	POST
 ADMIN	/documents	PUT
@@ -38,3 +34,15 @@ ADMIN	/assigns	GET
 ADMIN	/assigns	POST
 ADMIN	/assigns	PUT
 ADMIN	/assigns	DELETE
+LAWYER	/documents	GET
+LAWYER	/documents	POST
+LAWYER	/documents	PUT
+LAWYER	/documents	DELETE
+LAWYER	/lawyers	GET
+LAWYER	/lawyers	POST
+LAWYER	/lawyers	PUT
+LAWYER	/lawyers	DELETE
+PARALEGAL	/paralegals	GET
+PARALEGAL	/paralegals	POST
+PARALEGAL	/paralegals	PUT
+PARALEGAL	/paralegals	DELETE

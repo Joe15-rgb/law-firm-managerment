@@ -1,6 +1,7 @@
 import { asyncMiddleware } from "@app/middlewares/asyncMiddleware";
 import { upload } from "@app/middlewares/uploder_middleware";
 import DocumentCasePrismaService from "@app/services/document_service";
+import { DocumentType } from "@prisma/client";
 import StorageService from "@services/storage";
 import { ErrorWithStatus } from "@tools/errors";
 import type { Request, Response } from "express";
@@ -12,14 +13,14 @@ const DocumentCreateSchema = Joi.object({
   title: Joi.string().required().max(150),
   description: Joi.string().optional().allow(''),
   documentType: Joi.string()
-    .valid('CONTRACT', 'REPORT', 'EVIDENCE', 'OTHER')
+    .valid(...Object.values(DocumentType))
     .required(),
 });
 
 const DocumentUpdateSchema = Joi.object({
   title: Joi.string().max(150),
   description: Joi.string().optional().allow(''),
-  documentType: Joi.string().valid('CONTRACT', 'REPORT', 'EVIDENCE', 'OTHER'),
+  documentType: Joi.string().valid(...Object.values(DocumentType)),
 }).min(1);
 
 class DocumentController {
@@ -32,7 +33,8 @@ class DocumentController {
     asyncMiddleware(async (req: Request, res: Response) => {
       const { error, value } = DocumentCreateSchema.validate(req.body);
       if (error) {
-        throw new ErrorWithStatus('Validation failed', 400);
+        res.send(error.details)
+        // throw new ErrorWithStatus('Validation failed', 400);
       }
 
       const { legalCaseId, title, description, documentType } = value;
@@ -45,7 +47,10 @@ class DocumentController {
       // Validation du type MIME
       const allowedMimeTypes = [
         'application/pdf',
+        'application/docx',
+        'application/doc',
         'image/jpeg',
+        'image/jpg',
         'image/png',
         'text/plain',
       ];
@@ -57,17 +62,20 @@ class DocumentController {
         title,
         description,
         fileName: file.originalname,
-        fileUrl: file.fieldname,
+        fileUrl: file.path,
         legalCaseId,
         mimeType: file.mimetype,
         documentType,
         size: file.size
       });
 
-      res.status(201).json({
-        status: 'success',
-        data: this.sanitizeDocument(newDocument)
-      });
+
+      // res.status(201).json({
+      //   status: 'success',
+      //   data: this.sanitizeDocument(newDocument)
+      // });
+      req.flash('success', 'Element ajouter avec success')
+      res.status(201).redirect('/lawyers')
     })
   ];
 

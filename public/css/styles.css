@@ -329,7 +329,6 @@ svg {
    box-shadow: var(--box-shadow-2);
    background-color: var(--background-color);
    padding: 1rem;
-   max-width: 450px;
    width: 100%;
    border-radius: 6px;
 }
@@ -356,6 +355,7 @@ svg {
    justify-content: space-between;
    padding: 0.5rem;
    align-items: center;
+   width: 100%;
 }
 
 .form {
@@ -564,6 +564,10 @@ button[type='submit'] {
       -moz-border-radius: 6px;
       -ms-border-radius: 6px;
       -o-border-radius: 6px;
+      -webkit-transition: transform 0.2s ease-in-out;
+      -moz-transition: transform 0.2s ease-in-out;
+      -ms-transition: transform 0.2s ease-in-out;
+      -o-transition: transform 0.2s ease-in-out;
       &:hover {
          transform: translateY(-5px);
 
@@ -707,8 +711,13 @@ button[type='submit'] {
          }
 
          &:hover {
-            background-color: #919090c1;
+            background-color: #409ec6c1;
             cursor: pointer;
+            font-weight: bold;
+
+            a {
+               color: #fff;
+            }
          }
       }
    }
@@ -900,4 +909,86 @@ button[type='submit'] {
          padding: 0.5rem;
       }
    }
+}
+.ledger-show {
+   width: 60%;
+   background-color: var(--background-color);
+   padding: 1rem;
+}
+
+.ledger-show .header .client,
+.ledger-show .header .info {
+   display: flex;
+   align-items: center;
+   gap: 15px;
+}
+
+.ledger-show .header {
+   width: 100%;
+   justify-content: space-between;
+   width: 100%;
+}
+
+.ledger-show .header .client {
+}
+
+.ledger-show .header .client-info a {
+   font-size: 18px;
+   font-weight: bold;
+}
+
+.ledger-show .header .createdAt {
+   display: grid;
+   grid-template-columns: 40px 1fr;
+   align-items: center;
+}
+
+.ledger-show .header .status {
+   padding: 0.5rem 1rem;
+   border-radius: 3px;
+   color: var(--surface-color);
+}
+
+.ledger-show .header .status[data-status='PENDING'] {
+   background-color: #ce650f;
+}
+
+.ledger-show .header .status[data-status='OPEN'] {
+   background-color: #0fce65;
+}
+
+.ledger-show .header .status[data-status='CLOSED'] {
+   background-color: #ce0f38;
+}
+
+.ledger-show .header .status[data-status='ARCHIVED'] {
+   background-color: #0f5bce;
+}
+
+.ledger-show .header .client img {
+   width: 70px;
+   height: 70px;
+   border-radius: 50%;
+   background-color: #333;
+   padding: 0.5rem;
+}
+
+.contents {
+   padding: 1.6rem;
+}
+
+.ledger-show .contents .title {
+   color: #00000058;
+   text-transform: uppercase;
+   font-size: 12px;
+}
+
+.ledger-show .contents p {
+   font-weight: bold;
+   padding: 0.5rem 0;
+}
+.ledger-show .action {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+   gap: 15px;
 }

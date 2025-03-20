@@ -1,4 +1,14 @@
 <%- include('../../partials/header') %>
+<style>
+  .modal.user {
+    max-width: 500px;
+  }
+
+  ._container_1lyn8_1 {
+    padding: 1rem;
+    max-width: 500px;
+  }
+</style>
 <div class="body-with-sidebar">
   <menu class="sidebar">
     <li><a href="/groups">Team</a></li>
@@ -7,6 +17,7 @@
     <li><a href="/groups">Admin</a></li>
     <li><a href="/groups">Security & access</a></li>
   </menu>
+
   <div class="contenair_users_list" x-data="setup(<%= JSON.stringify(users)%>)">
     <div class="header-section">
       <h2 class="title">User Management <span class="counter" x-text="`(${users.length})`"></span></h2>
@@ -23,6 +34,10 @@
           + Add User
         </button>
       </div>
+    </div>
+    <div class="_container_1lyn8_1">
+      <h4>Gére votre personnel ici</h4>
+      <p>Boostez l'engagement, libérez le pontiel: votre équipez est la force de demain.</p>
     </div>
     <!-- Table users -->
 
@@ -80,7 +95,7 @@
   </div>
 
 </div>
-<dialog class="modal">
+<dialog class="modal user">
   <div class="modal-content"></div>
 </dialog>
 <script>

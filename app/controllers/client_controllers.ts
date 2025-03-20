@@ -21,8 +21,8 @@ class ClientControllers {
          };
 
          const newClient = await service.createClient(data);
-
-         res.status(201).send(newClient);
+         req.flash('success', `Client enregistre avec succès ${newClient.id}`)
+         res.status(201).redirect('/clients');
       } catch (error) {
          console.error(error);
          res.status(500).send('Internal error server');

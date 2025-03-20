@@ -1,4 +1,82 @@
 <%- include('../../partials/header.ejs') %>
+<style>
+  .urgency,
+  .status-legder {
+    border-radius: 6px;
+    font-size: 10px;
+    padding: .5rem 1rem;
+    text-align: center;
+  }
+
+  .status-legder[data-status='PENDING'] {
+    background-color: #92690861;
+  }
+
+  .status-legder[data-status='COMPLETED'] {
+    background-color: #3d032061;
+  }
+
+  .status-legder[data-status='OPEN'] {
+    background-color: #08925f61;
+  }
+
+  .status-legder[data-status='ARCHIVED'] {
+    background-color: #08469261;
+  }
+
+  .urgency[data-urgency='HIGH'] {
+    background-color: #920d0861;
+  }
+
+  .urgency[data-urgency='MEDIUM'] {
+    background-color: #08469261;
+  }
+
+  .urgency[data-urgency='LOW'] {
+    background-color: #a5c1e461;
+  }
+
+  .modal.document,
+  .modal.appointment {
+    max-width: 650px;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .success {
+    color: green;
+  }
+
+  .upload {
+    border: 1px dashed #ccc;
+    height: 150px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    margin: .5rem 0;
+  }
+
+  .upload input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .upload label[for="document"]{
+    display: flex;
+    margin: 2rem auto;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+
+  }
+</style>
 <%- include('../../components/lawyer-header.ejs', user) %>
 <%- include('../../components/calendar-appointment.ejs') %>
 
@@ -14,13 +92,14 @@
   </div>
 
   <ul class="content active">
+    <%- include('../../partials/flash.ejs') %>
     <%- include('../../components/search-field') %>
     <template x-for="ledger in filteredLegalCases" :key="ledger.id">
       <li class="ledger-item">
         <input type="checkbox">
         <p x-text="ledger.legalCase.title"></p>
-        <button class="status-legder" x-text="ledger.legalCase.status"></button>
-        <p x-text="ledger.legalCase.urgency"></p>
+        <button class="status-legder" :data-status="ledger.legalCase.status" x-text="ledger.legalCase.status"></button>
+        <p class="urgency" :data-urgency="ledger.legalCase.urgency" x-text="ledger.legalCase.urgency"></p>
         <p x-text="ledger.legalCase.priority"></p>
         <button class="btn-transparent elipse" @click="toggleDropdown(ledger.id)">⋮</button>
         <%- include('../../components/dropdown-ledger.ejs') %>
@@ -45,7 +124,7 @@
         <%- include('../../components/dropdown-ledger.ejs') %>
       </li>
     </template>
-        <template x-if="ledgersGroups.length == 0">
+    <template x-if="ledgersGroups.length == 0">
       <div class="not-found-ledger">
         <h4>Aucun dossier est assigned a vos groupes </h4>
       </div>
@@ -58,30 +137,81 @@
 <div class="teams-container">
   <h2>Team your are is member</h2>
   <% groups.forEach(group => { %>
-   <div class="group-item">
-      <h4 class="name-group"><%= group.name  %></h4>
-      <div class="member-avatar-list">
-        <% group.members.forEach(member => { %>
-          <img src="/avatars/<%= member.user.avatarUrl %>" alt="<%= member.user.firstName %>">
-        <% }) %>
-      </div>
-      <button class="btn-transparent" type="button">⋮</button>
-   </div>
+  <div class="group-item">
+    <h4 class="name-group"><%= group.name  %></h4>
+    <div class="member-avatar-list">
+      <% group.members.forEach(member => { %>
+      <img src="/avatars/<%= member.user.avatarUrl %>" alt="<%= member.user.firstName %>">
+      <% }) %>
+    </div>
+    <button class="btn-transparent" type="button">⋮</button>
+  </div>
   <% }) %>
 
 </div>
-<dialog class="modal">
+<dialog class="modal appointment">
   <div class="modal-header">
     <h3>Rendez-vous</h3>
-    <button class="btn-transparent close" hx-on:click="document.querySelector('.modal').close()">&times;</button>
+    <button class="btn-transparent close" hx-on:click="document.querySelector('.modal.appointment').close()">&times;</button>
   </div>
   <form class="form" action="/appointments/new" method="post">
     <% inputsAppointments.forEach(input => { %>
     <%- include('../../components/input', input) %>
     <% }) %>
-    <button type="submit">Fixe</button>
+    <button type="submit">Fixe un rendez-vous</button>
   </form>
 </dialog>
+<dialog class="modal document">
+  <div class="modal-header">
+    <h3>Ajouter les élèments à l'affaire</h3>
+    <button class="btn-transparent close" hx-on:click="document.querySelector('.modal.document').close()">&times;</button>
+  </div>
+  <div x-data="fileUploader()">
+    <form @submit.prevent="submitForm" action="/documents/register" class="form _action_1n6lm_13" method="post" enctype="multipart/form-data">
+      <div class="fields">
+        <%- include('../../components/input.ejs', {
+        type: 'textarea',
+        name: 'title',
+        value: '',
+        label: 'Titre du document'
+      }) %>
+        <%- include('../../components/input.ejs', {
+        type: 'select',
+        name: 'documentType',
+        selectedOption: documentType[0],
+        value: documentType,
+        label: 'Type de document'
+      }) %>
+        <input type="hidden" name="legalCaseId" id="legalCaseId" value="">
+        <%- include('../../components/input.ejs', {
+        type: 'textarea',
+        name: 'description',
+        value: '',
+        label: 'Description du document'
+      }) %>
+
+      </div>
+      <div class="uploder">
+        <div class="upload">
+          <label for="document">
+            <img src="/assets/uplode-cloud.svg" alt="uplode-cloud.svg" width="50" height="50">
+            Choisir un fichier ou glisser un fichier
+          </label>
+          <input type="file" name="file" id="document" x-ref="fileInput" @change="handleFileUpload">
+        </div>
+        <template x-if="error">
+          <p class="error" x-text="error"></p>
+        </template>
+        <button type="submit">Uploader</button>
+        <template x-if="successMessage">
+          <p class="success" x-text="successMessage"></p>
+        </template>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+
 <script>
   function LegalCaseManagement(propos, propos2) {
     return {
@@ -90,9 +220,17 @@
       ledgersGroups: propos2,
       activeDropdown: null,
       modal: document.querySelector('.modal'),
+      $(selector) {
+        return document.querySelector(selector)
+      },
 
       toggleDropdown(ledgerId) {
         this.activeDropdown = this.activeDropdown === ledgerId ? null : ledgerId;
+      },
+      addDocument(id) {
+        this.$('.modal.document').showModal()
+        this.$('#legalCaseId').value = id
+
       },
 
       checkIsActive(value) {
@@ -117,6 +255,49 @@
         return this.legalCases.filter(legalCase => ['title', 'status', 'urgency'].some(prop =>
           legalCase.legalCase[prop].toLowerCase().includes(searchTerm)))
       },
+    }
+  }
+
+  function fileUploader() {
+    return {
+      file: null,
+      error: '',
+      successMessage: '',
+      handleFileUpload(event) {
+        this.error = '';
+        this.successMessage = '';
+        const uploadedFile = event.target.files[0];
+        if (!uploadedFile) {
+          this.error = 'Aucun fichier sélectionné.';
+          return;
+        }
+        // Validation de l'extension autorisée : PDF, DOC, DOCX, JPEG, PNG,JPG
+        const allowedExtensions = ['pdf', 'doc', 'docx', 'jpeg', 'png', 'jpg'];
+        const fileExtension = uploadedFile.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(fileExtension)) {
+          this.error = 'Format de fichier non valide. Seuls les formats PDF, DOC, DOCX, JPEG, PNG et JPG sont autorisés.';
+          return;
+        }
+        // Vérification de la taille du fichier (5MB maximum)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (uploadedFile.size > maxSize) {
+          this.error = 'Le fichier est trop volumineux. Taille maximale autorisée : 5MB.';
+          return;
+        }
+        this.file = uploadedFile;
+      },
+      submitForm() {
+        if (!this.file) {
+          this.error = 'Veuillez sélectionner un fichier valide avant de soumettre.';
+          return;
+        }
+        document.querySelector('.form._action_1n6lm_13').submit()
+        console.log('Fichier prêt à être uploadé :', this.file);
+        this.successMessage = 'Fichier uploadé avec succès !';
+        // Réinitialisation du formulaire
+        this.file = null;
+        this.$refs.fileInput.value = "";
+      }
     }
   }
 </script>

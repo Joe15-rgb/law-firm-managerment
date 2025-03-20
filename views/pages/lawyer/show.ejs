@@ -1,0 +1,292 @@
+<%- include('../../partials/header.ejs') %>
+<style>
+  /* Variables CSS */
+  :root {
+    --primary-color: #2A3F54;
+    --secondary-color: #1ABB9C;
+    --text-color: #444;
+    --border-color: #e9ecef;
+    --background-light: #f8f9fa;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+  }
+
+  /* Reset de base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+
+  /* Layout principal */
+  .case-details {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  /* Section Client */
+  .client-profile {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .client-profile__header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .client-profile__avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--secondary-color);
+  }
+
+  .client-profile__name {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .client-profile__type {
+    color: var(--secondary-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  /* Section Infos dossier */
+  .case-info {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .case-info__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .case-info__item {
+    padding: 1rem;
+    border-left: 3px solid var(--secondary-color);
+  }
+
+  .case-info__item--fullwidth {
+    grid-column: 1 / -1;
+  }
+
+  .case-info__label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+  }
+
+  .case-info__value {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primary-color);
+  }
+
+  .case-info__value--priority {
+    color: var(--warning-color);
+    font-weight: 600;
+  }
+
+  .case-info__value--urgency {
+    color: var(--danger-color);
+    font-weight: 600;
+  }
+
+  /* Section Documents */
+  .case-documents {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .case-documents__title {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .case-documents__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .document-card {
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s ease;
+  }
+
+  .document-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .document-card__header {
+    margin-bottom: 1rem;
+  }
+
+  .document-card__title {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+  }
+
+  .document-card__filename {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+
+  .document-card__description {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    color: #666;
+  }
+
+  .document-card__meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .document-card__type {
+    background: var(--background-light);
+    color: var(--secondary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .document-card__size {
+    background: var(--background-light);
+    color: #6c757d;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  /* Accessibilité */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .client-profile__header {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .case-info__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .case-documents__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+<main class="case-details">
+  <!-- Section Client -->
+  <section class="client-profile" aria-label="Profil du client">
+    <div class="client-profile__header">
+      <img src="/assets/profile.svg" alt="Avatar de <%= `${myLegaCase.client.firstName} ${myLegaCase.client.lastName}` %>" class="client-profile__avatar">
+      <div class="client-profile__info">
+        <h1 class="client-profile__name">
+          <%= `${myLegaCase.client.firstName} ${myLegaCase.client.lastName}` %>
+        </h1>
+        <p class="client-profile__type"><%= myLegaCase.client.clientType %></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Dossier -->
+  <section class="case-info" aria-label="Informations du dossier">
+    <h2 class="visually-hidden">Détails du dossier</h2>
+
+    <dl class="case-info__grid">
+      <div class="case-info__item">
+        <dt class="case-info__label">Intitulé du dossier</dt>
+        <dd class="case-info__value"><%= myLegaCase.title %></dd>
+      </div>
+
+      <div class="case-info__item">
+        <dt class="case-info__label">Référence</dt>
+        <dd class="case-info__value"><%= `${myLegaCase.reference}/${myLegaCase.caseNumber}` %></dd>
+      </div>
+
+      <div class="case-info__item">
+        <dt class="case-info__label">Type de dossier</dt>
+        <dd class="case-info__value"><%= myLegaCase.caseType %></dd>
+      </div>
+
+      <div class="case-info__item">
+        <dt class="case-info__label">Priorité</dt>
+        <dd class="case-info__value case-info__value--priority"><%= myLegaCase.priority %></dd>
+      </div>
+
+      <div class="case-info__item">
+        <dt class="case-info__label">Degré d'urgence</dt>
+        <dd class="case-info__value case-info__value--urgency"><%= myLegaCase.urgency %></dd>
+      </div>
+
+      <div class="case-info__item case-info__item--fullwidth">
+        <dt class="case-info__label">Description</dt>
+        <dd class="case-info__value"><%= myLegaCase.description %></dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Section Documents -->
+  <section class="case-documents" aria-label="Documents du dossier">
+    <h2 class="case-documents__title">Éléments du dossier</h2>
+
+    <div class="case-documents__list">
+      <% myLegaCase.documents.forEach(document => { %>
+      <article class="document-card">
+        <header class="document-card__header">
+          <h3 class="document-card__title"><%= document.title %></h3>
+          <p class="document-card__filename"><%= document.fileName %></p>
+        </header>
+
+        <p class="document-card__description"><%= document.description %></p>
+
+        <footer class="document-card__meta">
+          <span class="document-card__type"><%= document.documentType %></span>
+          <span class="document-card__size"><%= formatFileSize(document.size) %></span>
+        </footer>
+      </article>
+      <% }) %>
+    </div>
+  </section>
+</main>
+<script>
+
+</script>
+<%- include('../../partials/footer.ejs') %>

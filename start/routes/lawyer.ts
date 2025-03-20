@@ -7,6 +7,6 @@ router.route('/').get(LawyerControllers.index);
 
 // router.route('/register').post();
 
-// router.route('/:id').get();
+router.route('/ledger/:id').get(LawyerControllers.readMyLegalCase);
 
 export default router;

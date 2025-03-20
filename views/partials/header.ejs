@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/css/styles.css">
   <script src="/js/alpine.min.js" defer></script>
   <script src="/js/htmx.min.js"></script>
@@ -28,7 +29,7 @@
         <img class="avatar" src="/avatars/<%= user.avatarUrl %>" alt="profile">
         <div class="info">
           <b class="name"><%= user.lastName + ' ' + user.firstName[0] %>.</b><br>
-          <span class="role"><%= user.role %></span>
+          <span style="color: #333;" class="role"><%= user.role %></span>
         </div>
         <svg viewBox="0 0 24 24">
           <use href="/assets/icons.svg#chevron_down" />

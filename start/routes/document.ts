@@ -7,4 +7,5 @@ router.route('/register')
 .post(DocumentController.create)
 
 
+
 export default router

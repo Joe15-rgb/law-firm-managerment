@@ -1,5 +1,6 @@
 import { asyncMiddleware } from '@app/middlewares/asyncMiddleware';
 import TreatmentPrismaService from '@app/services/treatment_service';
+import { prisma } from '@db/seeds/users_seed';
 import { ActorType, type Treatment } from '@prisma/client';
 import { ErrorWithStatus } from '@tools/errors';
 import type { Request, Response, NextFunction } from 'express';
@@ -35,37 +36,66 @@ class TreatmentController {
 
       const treatments = await this.service.getAllTreatments(page, limit);
 
-      const userAssign = treatments.filter((t) => t.actorType === 'USER');
-      const teamAssign = treatments.filter((t) => t.actorType === 'GROUP');
+      const ledgerNotAssigned = await prisma.legalCase.findMany({
+         where: {
+            treatments: {
+               none: {},
+            },
+         },
+         include: {
+            treatments: true,
+            client: true,
+         },
+      });
+
+      const treatmentsGroupedByActorType = await prisma.treatment.groupBy({
+         by:['actorType'],
+         _count:{
+            _all: true,
+         }
+      })
+
+      const ledgerAssigned = await Promise.all(
+         treatmentsGroupedByActorType.map(
+            async (group) => {
+               prisma.treatment.findMany({
+                  where: {
+                     actorType: group.actorType
+                  },
+                  include:{
+                     User: true,
+                     Group: true
+                  }
+               })
+               return {
+                  actorType: group.actorType,
+                  count: group._count._all,
+                  treatments
+               }
+            }
+         )
+      )
 
       const result = {
-         data: {
-            users: userAssign,
-            teams: teamAssign
-         },
-         pagination: {
-            page,
-            limit,
-            total: treatments.length,
-         },
-      };
+        ledgersNotAssigned: ledgerNotAssigned,
+        ledgersAssigned: ledgerAssigned
+      }
 
-      // res.status(200).render('pages/ledgers/assign', {result});
-      res.send(result);
+      res.status(200).render('pages/ledgers/assign', { result });
    });
 
    assign = asyncMiddleware(
       async (req: Request, res: Response): Promise<void> => {
          const { body } = req;
 
+         console.log(body);
+
          this.validateTreatmentInput(body);
 
          const treatment = await this.service.assignTreatment(body);
 
-         res.status(201).json({
-            message: 'Traitement assigné avec succès',
-            data: req.body,
-         });
+         req.flash('success', `Dossier ${treatment.legalCaseId} assigné avec succès à ${treatment.actorType} : ${treatment.groupId || treatment.userId}`)
+         res.status(201).redirect('/treatments')
       }
    );
 

@@ -22,8 +22,7 @@ class LedgerControllers {
 
    static show = asyncMiddleware(async (req: Request, res: Response) => {
       const ledger = await this.getLedgerOrFail(req.params.id);
-      // res.status(200).render('pages/ledgers/show', { ledger });
-      res.send(ledger)
+      res.status(200).render('pages/ledgers/show', { ledger });
    });
 
    static create = asyncMiddleware(async (req: Request, res: Response) => {
